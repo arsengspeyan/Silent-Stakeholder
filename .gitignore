@@ -2,5 +2,4 @@
 data/
 __pycache__/
 *.pyc
-viewer/gaps.json
 viewer/gaps_qa.json
