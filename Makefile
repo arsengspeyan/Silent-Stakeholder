@@ -1,4 +1,4 @@
-.PHONY: run refresh viewer install
+.PHONY: run refresh viewer qa install
 
 # Run the full pipeline (uses caches where available)
 run:
@@ -20,6 +20,11 @@ viewer:
 	@echo "  Press Ctrl+C to stop"
 	@echo ""
 	python3 -m http.server 8000
+
+# AI quality tester — latent need vs complaint summary (requires gaps.json + API key)
+qa:
+	@test -f gaps.json || (echo "ERROR: gaps.json not found. Run 'make run' first." && exit 1)
+	python3 src/qa_gaps.py
 
 # Install all Python dependencies
 install:

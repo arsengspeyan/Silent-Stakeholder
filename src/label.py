@@ -1,9 +1,9 @@
 """
-Stage 3 — Label
+Stage 3 — Label (Label agent)
 
-Uses the Anthropic API (claude-sonnet-4-6) to assign each cluster a plain-language
-latent-need label. The LLM only names clusters — it does NOT decide gaps, confidence,
-or verdicts. Those are handled by code in later stages.
+Anthropic Claude (claude-sonnet-4-6) assigns each cluster a plain-language
+latent-need label. The Label agent only names clusters — it does NOT decide gaps,
+confidence, or verdicts. Those are handled by code in later stages.
 
 Every API call is cached to data/label_cache/<cluster_id>.json so re-runs are free
 and reproducible. On re-run, already-cached clusters are skipped automatically.

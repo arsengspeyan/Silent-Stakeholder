@@ -31,7 +31,7 @@ Every gap MUST have:
 6. Emit ranked gaps.json, strongest evidence first
 
 ## Rules for the agent
-- LLM (Anthropic API) is used ONLY for: labeling clusters, verdict reasoning, drafting need text.
+- LLM (Anthropic API) is used ONLY for: labeling clusters, verdict reasoning, drafting need text, and optional QA critic (`qa_gaps.py`).
 - LLM NEVER decides the final ranking or the confidence numbers. Those are code.
 - Embeddings are LOCAL (sentence-transformers), not an API.
 - Cache every LLM call to disk (hash input → JSON), so re-runs are free and reproducible.
@@ -52,9 +52,10 @@ data/           # cached raw + intermediate (gitignored except samples)
 src/
   ingest.py     # pull reviews + github issues
   cluster.py    # embed + cluster reviews
-  label.py      # LLM cluster labeling (cached)
-  match.py      # theme -> roadmap matching + verdict
+  label.py      # Label agent — Anthropic cluster naming (cached)
+  match.py      # Match agent — theme -> roadmap matching + verdict
   score.py      # confidence formula
+  qa_gaps.py    # QA critic agent — tests gaps (cached; does not change gaps.json)
   pipeline.py   # runs all stages -> gaps.json
 viewer/         # thin UI over gaps.json
 gaps.json       # final output

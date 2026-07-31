@@ -405,10 +405,12 @@ flowchart TB
           </ul>
         </div>
         <div class="card">
-          <h2 style="margin-top:0">Where the LLM is used (and why)</h2>
+          <h2 style="margin-top:0">Three Anthropic Claude agents</h2>
+          <p>All use the same API key (<code>ANTHROPIC_API_KEY</code>) and model (<code>claude-sonnet-4-6</code>). Each has a different job.</p>
           <ul>
-            <li><strong>Label</strong> — turn 20 sample reviews into one plain-language need sentence. Naming only; cluster membership stays fixed.</li>
-            <li><strong>Match (edge case)</strong> — when an active GitHub issue exists and similarity is high, the LLM decides between MISUNDERSTOOD and addressed. Cached; rules handle everything else.</li>
+            <li><strong>Label agent</strong> (<code>label.py</code>) — turns ~20 sample reviews into one plain-language need sentence. Naming only; cluster membership stays fixed.</li>
+            <li><strong>Match agent</strong> (<code>match.py</code>) — when an active GitHub issue exists and similarity is high, decides MISUNDERSTOOD vs addressed. Rules handle everything else.</li>
+            <li><strong>QA critic agent</strong> (<code>qa_gaps.py</code>) — after the pipeline, grades each gap: latent need or complaint summary? <strong>Does not change scores or ranking.</strong> Run with <code>make qa</code>.</li>
           </ul>
         </div>
       </div>
@@ -427,12 +429,13 @@ flowchart TB
       <h2>How to demo</h2>
       <ul>
         <li><code>make run</code> — runs all 5 stages, produces <code>gaps.json</code></li>
+        <li><code>make qa</code> — QA critic agent checks top gaps (pass / warn / fail)</li>
         <li><code>make viewer</code> — copies results and starts a local web server</li>
         <li>Open <code>http://localhost:8000/viewer/</code> — no AI runs here, just displays the output</li>
       </ul>
 
       <div class="highlight">
-        The LLM names clusters and resolves a few ambiguous verdicts — nothing else. Grouping, scores, and rank come from algorithms and a published formula. Any confidence number traces to a specific line in <code>score.py</code>.
+        Math finds patterns. Three Claude agents assist: Label names needs, Match resolves ambiguous verdicts, QA critic validates output. Scores and rank always come from code and a published formula in <code>score.py</code>.
       </div>
     </div>
   </section>
@@ -656,7 +659,7 @@ flowchart TB
         <ul>
           <li><strong>Latent, not literal</strong> — finds patterns users never stated directly, using clustering math across thousands of reviews</li>
           <li><strong>Evidence-first</strong> — every gap links to specific <code>rev_XXXX</code> IDs and GitHub issue numbers; nothing is hand-waved</li>
-          <li><strong>Code decides, AI assists</strong> — grouping, scoring, and ranking come from algorithms and a published formula; the LLM only names clusters and handles edge-case verdicts</li>
+          <li><strong>Code decides, AI assists</strong> — grouping, scoring, and ranking come from algorithms and a published formula; three Claude agents (Label, Match, QA critic) handle language and validation only</li>
         </ul>
       </div>
 
