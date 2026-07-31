@@ -81,9 +81,13 @@ MERGE_GROUPS = [
 # Number of headline gaps to surface as primary findings.
 TOP_N = 5
 
+# Number of sample review texts to embed in each gap (shown in the viewer)
+SAMPLE_REVIEWS_N = 5
+
 # ── paths ─────────────────────────────────────────────────────────────────────
 DATA_DIR     = Path(__file__).parent.parent / "data"
 MATCHED_FILE = DATA_DIR / "matched_needs.json"
+REVIEWS_FILE = DATA_DIR / "reviews.json"
 OUTPUT_FILE  = Path(__file__).parent.parent / "gaps.json"
 
 
@@ -273,8 +277,25 @@ def print_gap_table(gaps: list, title: str, n: int = None) -> None:
 
 # ── main ──────────────────────────────────────────────────────────────────────
 
+def pick_sample_reviews(review_ids: list, id_to_review: dict, n: int) -> list:
+    """
+    Pick n representative reviews from the cluster for display in the viewer.
+    Sort by text length descending (longer = more context), then take n.
+    """
+    reviews = [id_to_review[rid] for rid in review_ids if rid in id_to_review]
+    reviews.sort(key=lambda r: len(r.get("text") or ""), reverse=True)
+    return [
+        {"id": r["id"], "text": r["text"], "stars": r.get("stars"), "date": r.get("date")}
+        for r in reviews[:n]
+    ]
+
+
 def main():
     matched = load_json(MATCHED_FILE)
+
+    # Load reviews so we can embed sample texts into each gap
+    all_reviews  = load_json(REVIEWS_FILE)
+    id_to_review = {r["id"]: r for r in all_reviews}
 
     # Drop excluded clusters and non-gaps
     candidates = [
@@ -305,10 +326,13 @@ def main():
                 "review_ids":            need["review_ids"],
                 "matched_issue_numbers": [m["issue_number"] for m in need.get("matched_issues", [])],
             },
-            "review_count": need["size"],
-            "tightness":    need["tightness"],
-            "rationale":    need.get("rationale", ""),
-            "top_issue":    need["matched_issues"][0] if need.get("matched_issues") else None,
+            "review_count":   need["size"],
+            "tightness":      need["tightness"],
+            "rationale":      need.get("rationale", ""),
+            "top_issue":      need["matched_issues"][0] if need.get("matched_issues") else None,
+            "sample_reviews": pick_sample_reviews(
+                need["review_ids"], id_to_review, SAMPLE_REVIEWS_N
+            ),
         })
 
     gaps_pre.sort(key=lambda g: g["confidence"], reverse=True)

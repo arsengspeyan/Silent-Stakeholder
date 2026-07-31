@@ -201,6 +201,26 @@
     }
     .meta-box strong { color: #94a3b8; }
 
+    /* ── review cards ── */
+    .review-card {
+      background: #0f172a;
+      border: 1px solid #1e293b;
+      border-radius: 6px;
+      padding: .6rem .8rem;
+      margin-bottom: .5rem;
+    }
+    .review-meta {
+      font-size: .68rem;
+      color: #64748b;
+      margin-bottom: .25rem;
+      font-family: monospace;
+    }
+    .review-text {
+      font-size: .82rem;
+      color: #cbd5e1;
+      line-height: 1.5;
+    }
+
     /* ── error state ── */
     .error { color: #f87171; background: #1c0a0a; border: 1px solid #7f1d1d;
              border-radius: 8px; padding: 1rem; margin-top: 1rem; }
@@ -281,18 +301,28 @@ function breakdown(b) {
 function evidenceSection(gap, idx) {
   const reviewIds    = gap.evidence.review_ids   || [];
   const issueNumbers = gap.evidence.matched_issue_numbers || [];
+  const samples      = gap.sample_reviews || [];
 
-  const reviewChips = reviewIds.slice(0, 12).map(id =>
-    `<span class="chip">${id}</span>`
-  ).join("");
-  const reviewMore = reviewIds.length > 12
-    ? `<span class="chip chip-more">+${reviewIds.length - 12} more</span>` : "";
+  // Sample review texts
+  const sampleHtml = samples.map(r => `
+    <div class="review-card">
+      <div class="review-meta">${r.id} &nbsp;·&nbsp; ${'★'.repeat(r.stars || 0)}${'☆'.repeat(5-(r.stars||0))} &nbsp;·&nbsp; ${r.date || ''}</div>
+      <div class="review-text">${(r.text || '').replace(/</g,'&lt;')}</div>
+    </div>`).join("");
 
+  // Issue chips
   const issueChips = issueNumbers.slice(0, 8).map(n =>
     `<span class="chip"><a href="https://github.com/${GITHUB_REPO}/issues/${n}" target="_blank">#${n}</a></span>`
   ).join("");
   const issueMore = issueNumbers.length > 8
     ? `<span class="chip chip-more">+${issueNumbers.length - 8} more</span>` : "";
+
+  // Review ID chips (all IDs for traceability)
+  const reviewChips = reviewIds.slice(0, 10).map(id =>
+    `<span class="chip">${id}</span>`
+  ).join("");
+  const reviewMore = reviewIds.length > 10
+    ? `<span class="chip chip-more">+${reviewIds.length - 10} more</span>` : "";
 
   return `
     <button class="evidence-toggle" onclick="toggleEvidence(${idx})">
@@ -300,11 +330,15 @@ function evidenceSection(gap, idx) {
     </button>
     <div class="evidence-body" id="ev-${idx}">
       <div class="evidence-section">
-        <div class="ev-label">Review IDs (user-side evidence)</div>
+        <div class="ev-label">Sample reviews — what users actually said</div>
+        ${sampleHtml}
+      </div>
+      <div class="evidence-section" style="margin-top:.8rem">
+        <div class="ev-label">All review IDs (evidence trace)</div>
         <div class="chip-row">${reviewChips}${reviewMore}</div>
       </div>
-      <div class="evidence-section">
-        <div class="ev-label">Matched GitHub issues (roadmap-side evidence)</div>
+      <div class="evidence-section" style="margin-top:.6rem">
+        <div class="ev-label">Matched GitHub issues (roadmap-side)</div>
         <div class="chip-row">${issueChips || '<span style="color:#475569">none matched</span>'}${issueMore}</div>
       </div>
     </div>`;
