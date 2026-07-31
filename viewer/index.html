@@ -9,232 +9,218 @@
 
     body {
       font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
-      background: #0f1117;
-      color: #e2e8f0;
+      background: #ffffff;
+      color: #111111;
       line-height: 1.6;
-      padding: 2rem 1rem;
+      padding: 2.5rem 1.5rem;
     }
 
-    .container { max-width: 900px; margin: 0 auto; }
+    .container { max-width: 860px; margin: 0 auto; }
 
     /* ── header ── */
-    header { margin-bottom: 2.5rem; }
-    header h1 { font-size: 1.9rem; font-weight: 700; color: #f8fafc; }
-    header p  { color: #94a3b8; margin-top: .4rem; font-size: .95rem; }
-    .app-chip {
+    header { border-bottom: 2px solid #111; padding-bottom: 1.2rem; margin-bottom: 2rem; }
+    header h1 { font-size: 1.7rem; font-weight: 800; letter-spacing: -.01em; }
+    header p  { color: #555; margin-top: .3rem; font-size: .9rem; }
+    .app-label {
       display: inline-block;
-      background: #1e293b;
-      border: 1px solid #334155;
-      border-radius: 6px;
-      padding: .2rem .7rem;
-      font-size: .8rem;
-      color: #7dd3fc;
-      margin-top: .6rem;
+      border: 1px solid #ccc;
+      border-radius: 3px;
+      padding: .15rem .6rem;
+      font-size: .75rem;
+      color: #444;
+      margin-top: .5rem;
+      font-family: monospace;
     }
 
-    /* ── section headings ── */
+    /* ── section title ── */
     .section-title {
-      font-size: .72rem;
+      font-size: .68rem;
       font-weight: 700;
       letter-spacing: .12em;
       text-transform: uppercase;
-      color: #64748b;
-      margin: 2rem 0 1rem;
+      color: #888;
+      margin: 2rem 0 .8rem;
+      border-bottom: 1px solid #eee;
+      padding-bottom: .4rem;
     }
 
-    /* ── verdict badges ── */
+    /* ── verdict badge ── */
     .badge {
       display: inline-block;
-      border-radius: 4px;
-      padding: .15rem .55rem;
-      font-size: .72rem;
+      border: 1px solid #111;
+      border-radius: 2px;
+      padding: .1rem .45rem;
+      font-size: .68rem;
       font-weight: 700;
-      letter-spacing: .05em;
+      letter-spacing: .06em;
       text-transform: uppercase;
+      background: #fff;
+      color: #111;
     }
-    .badge-IGNORED           { background:#7f1d1d; color:#fca5a5; }
-    .badge-UNDER-PRIORITIZED { background:#78350f; color:#fcd34d; }
-    .badge-MISUNDERSTOOD     { background:#1e3a5f; color:#93c5fd; }
-    .badge-addressed         { background:#14532d; color:#86efac; }
+    .badge-MISUNDERSTOOD     { background: #111; color: #fff; }
+    .badge-UNDER-PRIORITIZED { background: #fff; color: #111; }
+    .badge-IGNORED           { background: #fff; color: #111; border-style: dashed; }
 
     /* ── gap card ── */
     .gap-card {
-      background: #1e293b;
-      border: 1px solid #334155;
-      border-radius: 12px;
-      padding: 1.4rem 1.6rem;
-      margin-bottom: 1.2rem;
-      transition: border-color .15s;
+      border: 1px solid #ddd;
+      border-radius: 4px;
+      padding: 1.4rem 1.5rem;
+      margin-bottom: 1rem;
     }
-    .gap-card:hover { border-color: #475569; }
-    .gap-card.headline { border-left: 3px solid #3b82f6; }
+    .gap-card.headline { border-color: #111; border-width: 1.5px; }
 
     .gap-header {
       display: flex;
-      align-items: flex-start;
+      align-items: baseline;
       justify-content: space-between;
       gap: 1rem;
-      margin-bottom: .8rem;
+      margin-bottom: .6rem;
     }
     .gap-rank {
-      font-size: 1.4rem;
+      font-size: 1.2rem;
       font-weight: 800;
-      color: #3b82f6;
+      color: #111;
       min-width: 2rem;
-      line-height: 1;
     }
-    .gap-rank.non-headline { color: #475569; font-size: 1.1rem; }
+    .gap-rank.dim { color: #aaa; font-size: 1rem; }
     .gap-theme {
-      font-size: 1.05rem;
+      font-size: 1rem;
       font-weight: 700;
-      color: #f1f5f9;
+      color: #111;
       flex: 1;
     }
     .gap-conf {
-      font-size: 1.1rem;
-      font-weight: 700;
-      color: #34d399;
+      font-size: 1rem;
+      font-weight: 800;
+      color: #111;
       white-space: nowrap;
     }
 
+    .gap-meta {
+      display: flex;
+      align-items: center;
+      gap: .6rem;
+      margin-bottom: .7rem;
+      font-size: .8rem;
+      color: #555;
+    }
+
     .gap-need {
-      color: #cbd5e1;
-      font-size: .9rem;
-      margin: .5rem 0 .9rem;
+      font-size: .88rem;
+      color: #333;
+      margin-bottom: 1rem;
       font-style: italic;
+      border-left: 3px solid #ddd;
+      padding-left: .8rem;
     }
 
     /* ── confidence bar ── */
-    .conf-bar-wrap { margin-bottom: .9rem; }
-    .conf-bar-label {
-      font-size: .7rem;
-      color: #64748b;
-      margin-bottom: .3rem;
+    .conf-wrap { margin-bottom: 1rem; }
+    .conf-label {
+      font-size: .65rem;
+      color: #888;
       text-transform: uppercase;
       letter-spacing: .08em;
+      margin-bottom: .25rem;
     }
-    .conf-bar-track {
-      background: #0f172a;
-      border-radius: 4px;
-      height: 6px;
-      overflow: hidden;
+    .conf-track {
+      background: #f0f0f0;
+      height: 5px;
+      border-radius: 2px;
     }
-    .conf-bar-fill {
+    .conf-fill {
       height: 100%;
-      border-radius: 4px;
-      background: linear-gradient(90deg, #2563eb, #34d399);
+      background: #111;
+      border-radius: 2px;
     }
 
-    /* ── breakdown grid ── */
+    /* ── breakdown ── */
     .breakdown {
       display: grid;
       grid-template-columns: repeat(3, 1fr);
       gap: .5rem;
-      margin-bottom: .9rem;
+      margin-bottom: 1rem;
     }
-    .breakdown-cell {
-      background: #0f172a;
-      border-radius: 6px;
-      padding: .5rem .7rem;
+    .bd-cell {
+      border: 1px solid #eee;
+      border-radius: 3px;
+      padding: .45rem .6rem;
     }
-    .breakdown-cell .label {
-      font-size: .65rem;
-      color: #64748b;
+    .bd-label { font-size: .62rem; color: #888; text-transform: uppercase; letter-spacing: .07em; }
+    .bd-val   { font-size: .9rem; font-weight: 700; color: #111; margin-top: .1rem; }
+
+    /* ── evidence ── */
+    .ev-toggle {
+      background: #fff;
+      border: 1px solid #ccc;
+      border-radius: 3px;
+      color: #444;
+      font-size: .75rem;
+      padding: .3rem .7rem;
+      cursor: pointer;
+    }
+    .ev-toggle:hover { border-color: #111; color: #111; }
+
+    .ev-body { display: none; margin-top: .8rem; }
+    .ev-body.open { display: block; }
+
+    .ev-section { margin-bottom: .8rem; }
+    .ev-label {
+      font-size: .62rem;
       text-transform: uppercase;
       letter-spacing: .08em;
+      color: #888;
+      margin-bottom: .4rem;
     }
-    .breakdown-cell .val {
-      font-size: .95rem;
-      font-weight: 700;
-      color: #e2e8f0;
-      margin-top: .1rem;
-    }
-
-    /* ── evidence section ── */
-    .evidence-toggle {
-      background: none;
-      border: 1px solid #334155;
-      border-radius: 6px;
-      color: #94a3b8;
-      font-size: .78rem;
-      padding: .3rem .8rem;
-      cursor: pointer;
-      margin-bottom: .5rem;
-      transition: border-color .15s, color .15s;
-    }
-    .evidence-toggle:hover { border-color: #64748b; color: #e2e8f0; }
-
-    .evidence-body { display: none; margin-top: .6rem; }
-    .evidence-body.open { display: block; }
-
-    .evidence-section { margin-bottom: .7rem; }
-    .evidence-section .ev-label {
-      font-size: .68rem;
-      text-transform: uppercase;
-      letter-spacing: .09em;
-      color: #64748b;
-      margin-bottom: .3rem;
-    }
-    .chip-row { display: flex; flex-wrap: wrap; gap: .35rem; }
-    .chip {
-      background: #0f172a;
-      border: 1px solid #1e293b;
-      border-radius: 4px;
-      padding: .15rem .5rem;
-      font-size: .72rem;
-      color: #94a3b8;
-      font-family: monospace;
-    }
-    .chip a { color: #7dd3fc; text-decoration: none; }
-    .chip a:hover { text-decoration: underline; }
-    .chip-more { color: #475569; font-style: italic; }
-
-    /* ── meta section ── */
-    .meta-box {
-      background: #1e293b;
-      border: 1px solid #334155;
-      border-radius: 8px;
-      padding: 1rem 1.2rem;
-      font-size: .8rem;
-      color: #64748b;
-      margin-top: 2.5rem;
-    }
-    .meta-box strong { color: #94a3b8; }
 
     /* ── review cards ── */
     .review-card {
-      background: #0f172a;
-      border: 1px solid #1e293b;
-      border-radius: 6px;
-      padding: .6rem .8rem;
-      margin-bottom: .5rem;
+      border: 1px solid #eee;
+      border-radius: 3px;
+      padding: .55rem .7rem;
+      margin-bottom: .4rem;
     }
-    .review-meta {
-      font-size: .68rem;
-      color: #64748b;
-      margin-bottom: .25rem;
+    .review-meta { font-size: .65rem; color: #999; margin-bottom: .2rem; font-family: monospace; }
+    .review-text { font-size: .83rem; color: #222; line-height: 1.5; }
+
+    /* ── chips ── */
+    .chip-row { display: flex; flex-wrap: wrap; gap: .3rem; }
+    .chip {
+      border: 1px solid #ddd;
+      border-radius: 2px;
+      padding: .1rem .4rem;
+      font-size: .7rem;
+      color: #444;
       font-family: monospace;
     }
-    .review-text {
-      font-size: .82rem;
-      color: #cbd5e1;
-      line-height: 1.5;
-    }
-
-    /* ── error state ── */
-    .error { color: #f87171; background: #1c0a0a; border: 1px solid #7f1d1d;
-             border-radius: 8px; padding: 1rem; margin-top: 1rem; }
+    .chip a { color: #111; text-decoration: none; }
+    .chip a:hover { text-decoration: underline; }
+    .chip-more { color: #aaa; font-style: italic; border-style: dashed; }
 
     /* ── merged tag ── */
     .merged-tag {
-      font-size: .68rem;
-      color: #818cf8;
-      background: #1e1b4b;
-      border: 1px solid #312e81;
-      border-radius: 4px;
-      padding: .12rem .45rem;
+      font-size: .65rem;
+      color: #666;
+      border: 1px solid #ccc;
+      border-radius: 2px;
+      padding: .1rem .4rem;
       margin-left: .5rem;
+      font-weight: 400;
     }
+
+    /* ── meta footer ── */
+    .meta-box {
+      border-top: 1px solid #eee;
+      margin-top: 3rem;
+      padding-top: 1rem;
+      font-size: .78rem;
+      color: #888;
+    }
+
+    /* ── error ── */
+    .error { border: 1px solid #111; border-radius: 3px; padding: 1rem; color: #111; }
+    .error code { font-family: monospace; background: #f5f5f5; padding: .1rem .3rem; }
   </style>
 </head>
 <body>
@@ -242,21 +228,15 @@
 
   <header>
     <h1>Silent Stakeholder</h1>
-    <p>Unmet user needs the roadmap is missing — mined from app reviews vs GitHub issues.</p>
-    <span class="app-chip">PPSSPP (org.ppsspp.ppsspp) &nbsp;·&nbsp; hrydgard/ppsspp</span>
+    <p>Unmet user needs the PPSSPP roadmap is missing — mined from 9,771 reviews vs 4,004 GitHub issues.</p>
+    <span class="app-label">org.ppsspp.ppsspp &nbsp;·&nbsp; hrydgard/ppsspp</span>
   </header>
 
-  <div id="root">Loading gaps.json…</div>
+  <div id="root">Loading…</div>
 
   <div class="meta-box" id="meta-box" style="display:none">
-    <strong>Pipeline:</strong>
-    9,771 reviews → filter → UMAP → HDBSCAN → 23 clusters → claude-sonnet-4-6 labels →
-    cosine similarity match against 4,004 GitHub issues → rule-based + LLM verdicts →
-    confidence formula (volume 35% · tightness 20% · gap clarity 45%) → ranked gaps.
-    <br><br>
-    <strong>Confidence formula:</strong>
-    (0.35 × log-volume) + (0.20 × tightness) + (0.45 × gap_clarity)
-    &nbsp;·&nbsp;
+    Pipeline: reviews → UMAP → HDBSCAN clusters → Claude labels → cosine similarity match → verdicts → confidence formula<br>
+    Formula: (0.35 × log-volume) + (0.20 × tightness) + (0.45 × gap clarity) &nbsp;·&nbsp;
     Gap clarity: IGNORED 1.0 · UNDER-PRIORITIZED 0.8 · MISUNDERSTOOD 0.6
   </div>
 
@@ -265,108 +245,85 @@
 <script>
 const GITHUB_REPO = "hrydgard/ppsspp";
 
-function verdictBadge(v) {
+function badge(v) {
   return `<span class="badge badge-${v}">${v}</span>`;
 }
 
 function confBar(pct) {
-  const num = parseFloat(pct);
   return `
-    <div class="conf-bar-wrap">
-      <div class="conf-bar-label">Confidence</div>
-      <div class="conf-bar-track">
-        <div class="conf-bar-fill" style="width:${num}%"></div>
-      </div>
+    <div class="conf-wrap">
+      <div class="conf-label">Confidence — ${pct}</div>
+      <div class="conf-track"><div class="conf-fill" style="width:${parseFloat(pct)}%"></div></div>
     </div>`;
 }
 
 function breakdown(b) {
   return `
     <div class="breakdown">
-      <div class="breakdown-cell">
-        <div class="label">Volume score</div>
-        <div class="val">${(b.volume_score * 100).toFixed(1)}%</div>
-      </div>
-      <div class="breakdown-cell">
-        <div class="label">Tightness</div>
-        <div class="val">${(b.tightness * 100).toFixed(1)}%</div>
-      </div>
-      <div class="breakdown-cell">
-        <div class="label">Gap clarity</div>
-        <div class="val">${(b.gap_clarity * 100).toFixed(0)}%</div>
-      </div>
+      <div class="bd-cell"><div class="bd-label">Volume</div><div class="bd-val">${(b.volume_score*100).toFixed(1)}%</div></div>
+      <div class="bd-cell"><div class="bd-label">Tightness</div><div class="bd-val">${(b.tightness*100).toFixed(1)}%</div></div>
+      <div class="bd-cell"><div class="bd-label">Gap clarity</div><div class="bd-val">${(b.gap_clarity*100).toFixed(0)}%</div></div>
     </div>`;
 }
 
 function evidenceSection(gap, idx) {
-  const reviewIds    = gap.evidence.review_ids   || [];
+  const reviewIds    = gap.evidence.review_ids || [];
   const issueNumbers = gap.evidence.matched_issue_numbers || [];
   const samples      = gap.sample_reviews || [];
 
-  // Sample review texts
   const sampleHtml = samples.map(r => `
     <div class="review-card">
-      <div class="review-meta">${r.id} &nbsp;·&nbsp; ${'★'.repeat(r.stars || 0)}${'☆'.repeat(5-(r.stars||0))} &nbsp;·&nbsp; ${r.date || ''}</div>
-      <div class="review-text">${(r.text || '').replace(/</g,'&lt;')}</div>
-    </div>`).join("");
+      <div class="review-meta">${r.id} · ${'★'.repeat(r.stars||0)}${'☆'.repeat(5-(r.stars||0))} · ${r.date||''}</div>
+      <div class="review-text">${(r.text||'').replace(/</g,'&lt;')}</div>
+    </div>`).join('');
 
-  // Issue chips
-  const issueChips = issueNumbers.slice(0, 8).map(n =>
+  const idChips = reviewIds.slice(0,10).map(id=>`<span class="chip">${id}</span>`).join('');
+  const idMore  = reviewIds.length>10 ? `<span class="chip chip-more">+${reviewIds.length-10} more</span>` : '';
+
+  const issChips = issueNumbers.slice(0,8).map(n=>
     `<span class="chip"><a href="https://github.com/${GITHUB_REPO}/issues/${n}" target="_blank">#${n}</a></span>`
-  ).join("");
-  const issueMore = issueNumbers.length > 8
-    ? `<span class="chip chip-more">+${issueNumbers.length - 8} more</span>` : "";
-
-  // Review ID chips (all IDs for traceability)
-  const reviewChips = reviewIds.slice(0, 10).map(id =>
-    `<span class="chip">${id}</span>`
-  ).join("");
-  const reviewMore = reviewIds.length > 10
-    ? `<span class="chip chip-more">+${reviewIds.length - 10} more</span>` : "";
+  ).join('');
+  const issMore  = issueNumbers.length>8 ? `<span class="chip chip-more">+${issueNumbers.length-8} more</span>` : '';
 
   return `
-    <button class="evidence-toggle" onclick="toggleEvidence(${idx})">
-      Show evidence (${reviewIds.length} reviews · ${issueNumbers.length} issues)
-    </button>
-    <div class="evidence-body" id="ev-${idx}">
-      <div class="evidence-section">
-        <div class="ev-label">Sample reviews — what users actually said</div>
+    <button class="ev-toggle" onclick="toggleEv(${idx})">Show evidence (${reviewIds.length} reviews · ${issueNumbers.length} issues)</button>
+    <div class="ev-body" id="ev-${idx}">
+      <div class="ev-section">
+        <div class="ev-label">What users said</div>
         ${sampleHtml}
       </div>
-      <div class="evidence-section" style="margin-top:.8rem">
-        <div class="ev-label">All review IDs (evidence trace)</div>
-        <div class="chip-row">${reviewChips}${reviewMore}</div>
+      <div class="ev-section">
+        <div class="ev-label">Review IDs</div>
+        <div class="chip-row">${idChips}${idMore}</div>
       </div>
-      <div class="evidence-section" style="margin-top:.6rem">
-        <div class="ev-label">Matched GitHub issues (roadmap-side)</div>
-        <div class="chip-row">${issueChips || '<span style="color:#475569">none matched</span>'}${issueMore}</div>
+      <div class="ev-section">
+        <div class="ev-label">Matched GitHub issues</div>
+        <div class="chip-row">${issChips||'<span style="color:#aaa">none</span>'}${issMore}</div>
       </div>
     </div>`;
 }
 
-function toggleEvidence(idx) {
-  const el = document.getElementById(`ev-${idx}`);
-  el.classList.toggle("open");
+function toggleEv(idx) {
+  const el  = document.getElementById(`ev-${idx}`);
   const btn = el.previousElementSibling;
-  btn.textContent = el.classList.contains("open")
-    ? btn.textContent.replace("Show", "Hide")
-    : btn.textContent.replace("Hide", "Show");
+  el.classList.toggle('open');
+  btn.textContent = el.classList.contains('open')
+    ? btn.textContent.replace('Show','Hide')
+    : btn.textContent.replace('Hide','Show');
 }
 
-function renderGap(gap, idx, isHeadline) {
+function renderGap(gap, idx, headline) {
   const mergedTag = gap.merged_from
-    ? `<span class="merged-tag">merged ${gap.merged_from.length} clusters</span>` : "";
+    ? `<span class="merged-tag">merged ${gap.merged_from.length} clusters</span>` : '';
 
   return `
-    <div class="gap-card ${isHeadline ? "headline" : ""}">
+    <div class="gap-card ${headline?'headline':''}">
       <div class="gap-header">
-        <div class="gap-rank ${isHeadline ? "" : "non-headline"}">#${gap.rank}</div>
+        <div class="gap-rank ${headline?'':'dim'}">#${gap.rank}</div>
         <div class="gap-theme">${gap.theme}${mergedTag}</div>
         <div class="gap-conf">${gap.confidence_pct}</div>
       </div>
-      <div style="margin-bottom:.6rem">${verdictBadge(gap.verdict)}
-        &nbsp;<span style="color:#64748b;font-size:.8rem">${gap.review_count} reviews</span>
-      </div>
+      <div class="gap-meta">${badge(gap.verdict)} <span>${gap.review_count} reviews</span></div>
       <p class="gap-need">"${gap.need}"</p>
       ${confBar(gap.confidence_pct)}
       ${breakdown(gap.confidence_breakdown)}
@@ -376,37 +333,30 @@ function renderGap(gap, idx, isHeadline) {
 
 async function load() {
   try {
-    const resp = await fetch("../gaps.json");
+    const resp = await fetch('../gaps.json');
     if (!resp.ok) throw new Error(`HTTP ${resp.status}`);
     const data = await resp.json();
 
     const headline = data.headline_gaps || [];
-    const all      = data.all_gaps      || [];
-    const rest     = all.filter(g => !g.headline);
+    const rest     = (data.all_gaps||[]).filter(g => !g.headline);
 
-    let html = "";
-
-    html += `<p class="section-title">★ Headline gaps — top ${headline.length} distinct unmet needs</p>`;
-    headline.forEach((g, i) => { html += renderGap(g, i, true); });
+    let html = `<p class="section-title">Top ${headline.length} unmet needs</p>`;
+    headline.forEach((g,i) => html += renderGap(g, i, true));
 
     if (rest.length) {
-      html += `<p class="section-title">All other gaps (ranked)</p>`;
-      rest.forEach((g, i) => { html += renderGap(g, headline.length + i, false); });
+      html += `<p class="section-title">All gaps (ranked)</p>`;
+      rest.forEach((g,i) => html += renderGap(g, headline.length+i, false));
     }
 
-    document.getElementById("root").innerHTML = html;
-    document.getElementById("meta-box").style.display = "block";
+    document.getElementById('root').innerHTML = html;
+    document.getElementById('meta-box').style.display = 'block';
 
-  } catch (err) {
-    document.getElementById("root").innerHTML =
-      `<div class="error">
-        <strong>Could not load gaps.json</strong><br>
+  } catch(err) {
+    document.getElementById('root').innerHTML = `
+      <div class="error">
+        <strong>Could not load gaps.json</strong><br><br>
         ${err.message}<br><br>
-        Run the pipeline first: <code>make run</code><br>
-        Then serve with: <code>make viewer</code> and open
-        <a href="http://localhost:8000/viewer/" style="color:#7dd3fc">
-          http://localhost:8000/viewer/
-        </a>
+        Run: <code>make run</code> then <code>make viewer</code>
       </div>`;
   }
 }
