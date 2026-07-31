@@ -324,6 +324,9 @@ flowchart TB
 
     Viewer["Results viewer<br/>make viewer"]
 
+    QA["QA critic agent<br/>make qa · optional"]
+    QOut["gaps_qa.json<br/>pass / warn / fail"]
+
     HF --> S1A --> S1B --> R
     GH --> S1C --> I
     GH --> S1D --> M
@@ -335,12 +338,15 @@ flowchart TB
     I --> Ma
     M --> Ma
     Ma --> Sc --> Out --> Viewer
+    Out -.-> QA -.-> QOut
 
     style Stage1 fill:#dbeafe,stroke:#2563eb,stroke-width:2px
     style Stage2 fill:#dbeafe,stroke:#2563eb,stroke-width:2px
     style Stages35 fill:#dbeafe,stroke:#2563eb,stroke-width:2px
     style Out fill:#bbf7d0,stroke:#16a34a,stroke-width:3px
     style Viewer fill:#bbf7d0,stroke:#16a34a,stroke-width:3px
+    style QA fill:#f5f3ff,stroke:#7c3aed,stroke-width:2px,stroke-dasharray:5 5
+    style QOut fill:#f5f3ff,stroke:#7c3aed,stroke-width:2px
     style Sources fill:#fef3c7,stroke:#f59e0b,stroke-width:2px
     style Cache1 fill:#f0fdf4,stroke:#16a34a,stroke-width:2px
     style Cache2 fill:#f0fdf4,stroke:#16a34a,stroke-width:2px
@@ -350,7 +356,7 @@ flowchart TB
       </div>
 
       <div class="highlight">
-        <code>make run</code> executes the full chain left-to-right and writes <code>gaps.json</code>. <code>make viewer</code> copies that file and serves the Results page — the pipeline does not run again at demo time.
+        <code>make run</code> executes the full chain and writes <code>gaps.json</code>. Optional: <code>make qa</code> runs the QA critic agent (does not change scores). <code>make viewer</code> serves the Results page — the pipeline does not run again at demo time.
       </div>
     </div>
   </section>
@@ -523,8 +529,13 @@ flowchart TB
         <p>Runs the confidence formula on every gap candidate. Merges clusters that represent the same underlying need (documented in code with reasons). Ranks all gaps, picks top 5 as headline findings. Writes <code>gaps.json</code> with full evidence traces and formula breakdown per gap.</p>
       </div>
 
+      <div class="card">
+        <h2 style="margin-top:0">QA · Quality tester (<code>src/qa_gaps.py</code>) — optional</h2>
+        <p>The <strong>QA critic agent</strong> (Anthropic Claude) runs after the pipeline via <code>make qa</code>. It grades each headline gap <strong>pass / warn / fail</strong>: latent need vs complaint summary? Do sample reviews support the need? Writes <code>data/gaps_qa.json</code> with pitch tips. <strong>Does not change scores, ranking, or gaps.json.</strong> Grades appear on the Results page when QA was run before <code>make viewer</code>.</p>
+      </div>
+
       <div class="highlight">
-        Every LLM call is hashed and cached to disk. Stages 1–4 can re-run without cost. The final ranking and every confidence percentage come entirely from the formula in score.py.
+        Three Claude agents in production/testing: Label names needs, Match resolves ambiguous verdicts, QA critic validates output. Every call cached. Ranking and confidence always come from the formula in <code>score.py</code>.
       </div>
     </div>
   </section>
@@ -648,6 +659,15 @@ flowchart TB
     <div class="slide-inner">
       <div class="slide-num">Slide 11 — Summary &amp; demo</div>
       <h1>What Silent Stakeholder delivers</h1>
+
+      <div class="card">
+        <h2 style="margin-top:0">Commands</h2>
+        <ul>
+          <li><code>make run</code> — build <code>gaps.json</code></li>
+          <li><code>make qa</code> — QA critic grades headline gaps</li>
+          <li><code>make viewer</code> — Results + presentation in browser</li>
+        </ul>
+      </div>
 
       <div class="card">
         <h2 style="margin-top:0">The output</h2>

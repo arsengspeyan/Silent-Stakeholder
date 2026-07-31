@@ -16,7 +16,7 @@ make viewer   # open results in browser
 ```
 
 Then open:
-- **Results:** http://localhost:8000/viewer/
+- **Results:** http://localhost:8000/viewer/ (gaps + QA grades if you ran `make qa`)
 - **Guide:** http://localhost:8000/viewer/guide.html
 
 Press `Ctrl+C` to stop the server.

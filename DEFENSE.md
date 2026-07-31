@@ -2,7 +2,8 @@
 
 Quick answers to the questions judges will ask. Numbers are from the actual output — use them exactly.
 
-**Re-run after scoring changes:** `python3 src/score.py` then `make viewer`
+**Re-run after scoring changes:** `python3 src/score.py` then `make viewer`  
+**Run QA critic:** `make qa` (optional; requires `ANTHROPIC_API_KEY`)
 
 ---
 
@@ -16,6 +17,21 @@ The project is a 5-stage pipeline:
 5. **Score** — explicit formula: 35% volume + 20% tightness + 45% gap clarity → confidence %
 
 The LLM only names clusters and resolves ambiguous verdicts. It never decides rankings or confidence numbers. Those are code.
+
+A **fourth Claude agent** (QA critic, `src/qa_gaps.py`) runs **after** the pipeline via `make qa`. It grades each gap pass/warn/fail — latent need vs complaint summary. It does **not** change scores or ranking.
+
+---
+
+## "What does the QA critic agent do?"
+
+After `make run`, run `make qa`. The QA critic reads each headline gap + sample reviews and returns:
+- **grade** — pass / warn / fail
+- **is_latent_need** — true if the need goes beyond surface complaints
+- **pitch_tip** — how to present this gap to judges
+
+Output: `data/gaps_qa.json`. Shown on the Results page if you ran `make qa` before `make viewer`.
+
+**Current headline QA (example):** 2 pass, 3 warn, 0 fail. Gap #2 (game acquisition) **passes**. Gap #1 warns because the theme title sounds complaint-like — use the full `need` sentence in the pitch.
 
 ---
 

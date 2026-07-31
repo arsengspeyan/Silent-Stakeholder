@@ -44,11 +44,12 @@ Here is exactly what the AI does and does NOT do in this pipeline:
 | Task | Who does it |
 |---|---|
 | Grouping similar reviews | **Algorithm** (HDBSCAN clustering) |
-| Naming what each group is about | **AI** (Claude reads the reviews and writes a plain-language label) |
+| Naming what each group is about | **Label agent** (Anthropic Claude) |
 | Comparing groups to the roadmap | **Algorithm** (embedding similarity) |
-| Deciding the verdict (IGNORED / UNDER-PRIORITIZED / MISUNDERSTOOD) | **Rules in code** (based on issue labels and status) |
+| Deciding the verdict (IGNORED / UNDER-PRIORITIZED / MISUNDERSTOOD) | **Rules in code** (+ **Match agent** for ambiguous cases) |
 | Calculating the confidence score | **Formula in code** (never the AI's opinion) |
 | Ranking the final gaps | **Code** (sorts by confidence number) |
+| Testing if gaps are latent needs vs complaint summaries | **QA critic agent** (optional; `make qa`) — does not change output |
 
 The AI never gets to say "I think this is a 0.87 confidence gap." The formula does that, and the formula is written out explicitly so anyone can audit it.
 
@@ -145,9 +146,9 @@ The `tightness` score measures how similar the reviews inside the cluster are to
 
 ---
 
-## Stage 3 — Label (`src/label.py`) ✅ Done
+## Stage 3 — Label (`src/label.py`) ✅ Done — Label agent
 
-We now have 23 anonymous clusters — groups of reviews that are mathematically similar. But we don't know yet what each group is *about*. This is the one place where we use AI.
+We now have 23 anonymous clusters — groups of reviews that are mathematically similar. But we don't know yet what each group is *about*. The **Label agent** (Anthropic Claude) handles this.
 
 ### What we send to Claude
 
@@ -281,11 +282,35 @@ Every number is reproducible. A judge can recalculate any score by hand using th
 
 ---
 
-## Stage 6 — Pipeline + Output ✅ Done
+## Stage 6 — QA quality tester (`src/qa_gaps.py`) ✅ Done — QA critic agent
+
+Optional step after the pipeline. Run with `make qa`.
+
+The **QA critic agent** reads each headline gap from `gaps.json` plus sample reviews and asks Claude to grade it:
+
+| Question | Output field |
+|---|---|
+| Is this a latent need or a complaint summary? | `grade` (pass / warn / fail), `is_latent_need` |
+| Do the reviews support the need statement? | `evidence_alignment` (good / partial / weak) |
+| How should you pitch this to judges? | `pitch_tip` |
+| What did users literally say? | `surface_complaints` |
+| What need did they imply but not write? | `latent_need_check` |
+
+**Important:** QA does **not** modify `gaps.json`, scores, or ranking. It is a read-only testing layer.
+
+Results: `data/gaps_qa.json` and per-gap cache in `data/qa_cache/`. The Results viewer shows QA grades when this file is present.
+
+---
+
+## Pipeline + Output ✅ Done
 
 ### `make run`
 
-Running `make run` executes all 5 stages in order via `src/pipeline.py`. With caches warm, the full pipeline completes in **~27 seconds**. With `make refresh`, it recomputes everything from scratch.
+Running `make run` executes all 5 production stages in order via `src/pipeline.py`. With caches warm, the full pipeline completes in **~27 seconds**. With `make refresh`, it recomputes everything from scratch.
+
+### `make qa`
+
+Runs the QA critic on the top 5 headline gaps (or `--all` for every gap). Requires `ANTHROPIC_API_KEY`. Cached on re-run.
 
 ### `gaps.json`
 
@@ -298,7 +323,19 @@ The final output. Contains:
 
 ### `make viewer`
 
-Starts a local web server at `http://localhost:8000/viewer/`. The viewer reads `gaps.json` and shows each gap with its confidence bar, signal breakdown, verdict badge, sample review texts, and clickable GitHub issue links.
+Starts a local web server at `http://localhost:8000/viewer/`. The viewer reads `gaps.json` and shows each gap with its confidence bar, signal breakdown, verdict badge, sample review texts, and clickable GitHub issue links. If `gaps_qa.json` was copied (run `make qa` first), QA grades appear on each headline gap.
+
+---
+
+## Anthropic Claude agents (summary)
+
+All use the same `ANTHROPIC_API_KEY` and model `claude-sonnet-4-6`. All responses cached to disk.
+
+| Agent | Script | Role |
+|---|---|---|
+| Label agent | `src/label.py` | Names each cluster as a latent need |
+| Match agent | `src/match.py` | Ambiguous verdicts only |
+| QA critic agent | `src/qa_gaps.py` | Tests output quality (optional) |
 
 ---
 
@@ -308,10 +345,11 @@ Starts a local web server at `http://localhost:8000/viewer/`. The viewer reads `
 |---|---|---|
 | `src/ingest.py` | ✅ Done | Pulls reviews + GitHub data, caches locally |
 | `src/cluster.py` | ✅ Done | Embeds, reduces, clusters — 23 clusters found |
-| `src/label.py` | ✅ Done | Labels all 23 clusters via Claude API |
-| `src/match.py` | ✅ Done | Cosine similarity match + milestone-aware verdicts |
+| `src/label.py` | ✅ Done | Label agent — names all 23 clusters |
+| `src/match.py` | ✅ Done | Match agent + cosine similarity + milestone-aware verdicts |
 | `src/score.py` | ✅ Done | Confidence formula + cluster merging + ranking |
-| `src/pipeline.py` | ✅ Done | Orchestrates all stages → gaps.json |
+| `src/qa_gaps.py` | ✅ Done | QA critic agent — pass/warn/fail per gap |
+| `src/pipeline.py` | ✅ Done | Orchestrates production stages → gaps.json |
 | `data/reviews.json` | ✅ | 9,771 PPSSPP reviews with stable IDs |
 | `data/embeddings.npy` | ✅ | 9,771 × 384 embedding vectors (cached) |
 | `data/clusters.json` | ✅ | 23 clusters with review IDs and tightness |
@@ -321,7 +359,9 @@ Starts a local web server at `http://localhost:8000/viewer/`. The viewer reads `
 | `data/issue_embeddings.npy` | ✅ | 4,004 × 384 issue vectors (cached) |
 | `data/milestones.json` | ✅ | 70 GitHub milestones (4 open, 66 closed) |
 | `data/matched_needs.json` | ✅ | 23 needs with verdicts + matched issue numbers |
-| `data/match_cache/` | ✅ | Per-cluster LLM verdict responses (cached) |
-| `gaps.json` | ✅ | Final output — 5 headline gaps + 19 total ranked |
-| `viewer/index.html` | ✅ | Browser UI — serve with `make viewer` |
+| `data/match_cache/` | ✅ | Per-cluster Match agent responses (cached) |
+| `data/qa_cache/` | ✅ | Per-gap QA critic responses (cached) |
+| `data/gaps_qa.json` | ✅ | QA report — pass/warn/fail + pitch tips |
+| `gaps.json` | ✅ | Final output — 5 headline gaps + 18 total ranked |
+| `viewer/index.html` | ✅ | Browser UI — gaps + optional QA grades |
 | `DEFENSE.md` | ✅ | Live defense cheat sheet for judges |

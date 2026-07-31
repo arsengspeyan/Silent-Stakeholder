@@ -363,6 +363,57 @@
       flex-shrink: 0;
     }
 
+    .page-nav {
+      margin-top: 0.75rem;
+      font-size: 0.82rem;
+    }
+    .page-nav a { color: #1d4ed8; text-decoration: none; margin-right: 1rem; }
+    .page-nav a:hover { text-decoration: underline; }
+
+    .qa-badge {
+      display: inline-block;
+      font-size: 0.62rem;
+      font-weight: 700;
+      letter-spacing: 0.06em;
+      text-transform: uppercase;
+      padding: 0.15rem 0.45rem;
+      border-radius: 3px;
+      margin-left: 0.5rem;
+      vertical-align: middle;
+    }
+    .qa-pass { background: #dcfce7; color: #15803d; border: 1px solid #86efac; }
+    .qa-warn { background: #fffbeb; color: #b45309; border: 1px solid #fcd34d; }
+    .qa-fail { background: #fef2f2; color: #b91c1c; border: 1px solid #fca5a5; }
+
+    .qa-panel {
+      margin-top: 0.85rem;
+      padding: 0.85rem 1rem;
+      background: #f8fafc;
+      border: 1px solid var(--light);
+      border-left: 3px solid #64748b;
+      font-size: 0.82rem;
+    }
+    .qa-panel h4 {
+      font-size: 0.65rem;
+      font-weight: 700;
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
+      color: var(--gray);
+      margin: 0.75rem 0 0.35rem;
+    }
+    .qa-panel h4:first-child { margin-top: 0; }
+    .qa-panel ul { margin: 0.25rem 0 0 1.1rem; color: #444; }
+    .qa-panel p { color: #333; margin: 0; }
+
+    .qa-summary {
+      background: #fff;
+      border: 1px solid var(--light);
+      padding: 1rem 1.25rem;
+      margin-bottom: 2rem;
+      font-size: 0.85rem;
+    }
+    .qa-summary strong { font-weight: 600; }
+
     footer {
       margin-top: 1.5rem;
       padding: 0.85rem 1rem;
@@ -400,6 +451,10 @@
       <h1>Silent Stakeholder</h1>
       <p id="subtitle">Unmet user needs the PPSSPP roadmap is missing.</p>
       <div class="meta-line">org.ppsspp.ppsspp · hrydgard/ppsspp</div>
+      <div class="page-nav">
+        <a href="guide.html">Presentation</a>
+        <a href="#qa-section" id="qa-nav-link" hidden>QA grades</a>
+      </div>
     </header>
 
     <div class="legend">
@@ -409,7 +464,10 @@
       <span class="legend-item"><span class="legend-dot" style="background:var(--vol-text)"></span> Volume</span>
       <span class="legend-item"><span class="legend-dot" style="background:var(--tight-text)"></span> Tightness</span>
       <span class="legend-item"><span class="legend-dot" style="background:var(--gap-text)"></span> Gap clarity</span>
+      <span class="legend-item"><span class="legend-dot" style="background:#64748b"></span> QA pass/warn/fail</span>
     </div>
+
+    <div id="qa-summary" hidden></div>
 
     <div id="root">Loading…</div>
     <footer id="footer" hidden></footer>
@@ -482,15 +540,40 @@ function toggle(i) {
   btn.textContent = btn.textContent.replace(open ? "show" : "hide", open ? "hide" : "show");
 }
 
-function renderGap(gap, i) {
+function qaBadge(grade) {
+  if (!grade) return "";
+  const g = grade.toLowerCase();
+  const label = g === "pass" ? "QA pass" : g === "warn" ? "QA warn" : "QA fail";
+  return `<span class="qa-badge qa-${g}">${label}</span>`;
+}
+
+function qaPanel(qa, i) {
+  if (!qa) return "";
+  const complaints = (qa.surface_complaints || [])
+    .map(c => `<li>${esc(c)}</li>`).join("");
+  return `
+    <div class="qa-panel" id="qa-section-${i}">
+      <h4>QA critic · Anthropic Claude</h4>
+      <p>${esc(qa.reason)}</p>
+      ${qa.latent_need_check ? `<h4>Hidden need (inferred)</h4><p>${esc(qa.latent_need_check)}</p>` : ""}
+      ${complaints ? `<h4>Surface complaints (what users literally said)</h4><ul>${complaints}</ul>` : ""}
+      ${qa.pitch_tip ? `<h4>Pitch tip</h4><p>${esc(qa.pitch_tip)}</p>` : ""}
+      <p style="margin-top:0.5rem;font-size:0.72rem;color:#888">
+        Evidence: ${esc(qa.evidence_alignment || "—")} · Complaint risk: ${esc(qa.complaint_summary_risk || "—")}
+      </p>
+    </div>`;
+}
+
+function renderGap(gap, i, qaByCluster) {
   const b = gap.confidence_breakdown || {};
   const merged = gap.merged_from ? ` · merged ${gap.merged_from.length} clusters` : "";
   const vc = verdictClass(gap.verdict);
+  const qa = qaByCluster[gap.cluster_id];
 
   return `
-    <article class="gap ${vc}">
+    <article class="gap ${vc}" ${qa ? `id="qa-section"` : ""}>
       <div class="gap-top">
-        <div class="gap-title"><span class="gap-rank">#${gap.rank}</span> ${esc(gap.theme)}</div>
+        <div class="gap-title"><span class="gap-rank">#${gap.rank}</span> ${esc(gap.theme)}${qaBadge(qa?.grade)}</div>
         <div class="gap-score">${gap.confidence_pct}</div>
       </div>
       <div class="gap-meta">
@@ -505,8 +588,45 @@ function renderGap(gap, i) {
         <span class="stat stat-gap">Gap clarity ${pct(b.gap_clarity ?? 0)}</span>
       </div>
       ${b.formula ? `<div class="formula-line">${esc(b.formula)}</div>` : ""}
+      ${qaPanel(qa, i)}
       ${evidence(gap, i)}
     </article>`;
+}
+
+async function loadQa() {
+  for (const url of ["./gaps_qa.json", "gaps_qa.json"]) {
+    const resp = await fetch(url);
+    if (resp.ok) return resp.json();
+  }
+  return null;
+}
+
+function qaIndex(qaData) {
+  const map = {};
+  if (!qaData?.results) return map;
+  qaData.results.forEach(r => { map[r.cluster_id] = r; });
+  return map;
+}
+
+function renderQaSummary(qaData) {
+  const el = document.getElementById("qa-summary");
+  const nav = document.getElementById("qa-nav-link");
+  if (!qaData?.summary) return;
+
+  const s = qaData.summary;
+  el.innerHTML = `
+    <div class="qa-summary" id="qa-section">
+      <strong>QA critic agent</strong> (Anthropic Claude · <code>make qa</code>) —
+      tests whether headline gaps are latent needs vs complaint summaries.
+      Does not change scores or ranking.<br>
+      <span style="margin-top:0.35rem;display:inline-block">
+        pass: <strong>${s.pass ?? 0}</strong> ·
+        warn: <strong>${s.warn ?? 0}</strong> ·
+        fail: <strong>${s.fail ?? 0}</strong>
+      </span>
+    </div>`;
+  el.hidden = false;
+  nav.hidden = false;
 }
 
 async function loadGaps() {
@@ -521,7 +641,9 @@ async function loadGaps() {
 async function load() {
   const root = document.getElementById("root");
   try {
-    const data = await loadGaps();
+    const [data, qaData] = await Promise.all([loadGaps(), loadQa()]);
+    const qaByCluster = qaIndex(qaData);
+    renderQaSummary(qaData);
 
     const headline = data.headline_gaps || [];
     const rest = (data.all_gaps || []).filter(g => !g.headline);
@@ -529,14 +651,14 @@ async function load() {
     let html = `
       <div class="section section-headline">
         <div class="section-label">Top ${headline.length} unmet needs</div>`;
-    headline.forEach((g, i) => { html += renderGap(g, i); });
+    headline.forEach((g, i) => { html += renderGap(g, i, qaByCluster); });
     html += `</div>`;
 
     if (rest.length) {
       html += `
       <div class="section section-rest">
         <div class="section-label">All gaps</div>`;
-      rest.forEach((g, i) => { html += renderGap(g, headline.length + i); });
+      rest.forEach((g, i) => { html += renderGap(g, headline.length + i, qaByCluster); });
       html += `</div>`;
     }
 
@@ -544,7 +666,8 @@ async function load() {
 
     const footer = document.getElementById("footer");
     const m = data.meta || {};
-    footer.innerHTML = `${m.total_gaps ?? "—"} gaps · ${m.headline_count ?? headline.length} headline · confidence = 0.35×volume + 0.2×tightness + 0.45×gap clarity`;
+    const qaNote = qaData ? " · QA grades from gaps_qa.json" : "";
+    footer.innerHTML = `${m.total_gaps ?? "—"} gaps · ${m.headline_count ?? headline.length} headline · confidence = 0.35×volume + 0.2×tightness + 0.45×gap clarity${qaNote}`;
     footer.hidden = false;
 
   } catch (err) {
@@ -553,8 +676,9 @@ async function load() {
         Could not load <code>gaps.json</code>.<br><br>
         ${esc(err.message)}<br><br>
         From the project folder, run:<br>
-        <code>make run</code> then <code>make viewer</code><br><br>
-        Do not open this file directly — use the URL <code>http://localhost:8000</code>
+        <code>make run</code> then <code>make viewer</code><br>
+        Optional QA: <code>make qa</code> before <code>make viewer</code><br><br>
+        Do not open this file directly — use the URL <code>http://localhost:8000/viewer/</code>
       </div>`;
   }
 }

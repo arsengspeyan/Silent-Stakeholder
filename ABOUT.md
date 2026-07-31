@@ -46,7 +46,7 @@ The output is a file called `gaps.json`. It contains the top 3 to 5 unmet needs,
 
 ## How It Works — The Pipeline
 
-We built a six-stage pipeline. Each stage does one job, produces one output file, and can be inspected independently.
+We built a five-stage pipeline plus an optional QA layer. Each production stage does one job, produces one output file, and can be inspected independently.
 
 ### Stage 1 — Ingest ✅
 Pull 9,771 user reviews from HuggingFace and 4,004 GitHub issues from the PPSSPP repository. Every record gets a stable ID that never changes. IDs are the evidence currency of the entire system — every finding can be traced back to the exact reviews and issues that support it.
@@ -54,30 +54,17 @@ Pull 9,771 user reviews from HuggingFace and 4,004 GitHub issues from the PPSSPP
 ### Stage 2 — Cluster ✅
 Convert each review into a mathematical representation of its meaning (an "embedding"), compress the space using UMAP, then use HDBSCAN to find natural groupings. Reviews that circle the same underlying problem land in the same cluster — without anyone telling the algorithm what to look for. Result: **23 clusters** from 2,905 substantive reviews.
 
-### Stage 3 — Label ✅
-For each cluster, send a sample of its reviews to Claude and ask: "What latent need do these users share?" Claude returns a theme name, a one-sentence need description, and a summary of the evidence pattern. This is the **only** place AI is used. The result is cached so re-runs cost nothing.
+### Stage 3 — Label ✅ (Label agent)
+For each cluster, the **Label agent** (Anthropic Claude) reads a sample of reviews and names the latent need: theme, one-sentence need, evidence summary. Cached to `data/label_cache/`.
 
-The 23 clusters produced themes including:
-- *Audio quality issues* — 110 reviews about sound lag and desync
-- *Multi-touch button input* — 38 reviews about inability to press buttons simultaneously
-- *RAR extraction confusion* — 39 reviews about not knowing how to open downloaded game files
-- *PS2 emulator request* — 38 reviews asking for the next generation of emulation
-- *Black screen rendering* — 94 reviews about games that start but show nothing
+### Stage 4 — Match ✅ (Match agent)
+Compare each labeled cluster against GitHub issues using embedding similarity. Rule-based verdicts (IGNORED / UNDER-PRIORITIZED / MISUNDERSTOOD). The **Match agent** (Claude) is only called for ambiguous cases when an active open issue exists.
 
-### Stage 4 — Match (coming next)
-Compare each labeled cluster against GitHub issues using embedding similarity. For each cluster, find the most relevant issues on the roadmap. Assign a verdict based on issue status and labels: is this need **IGNORED**, **UNDER-PRIORITIZED**, or **MISUNDERSTOOD**?
+### Stage 5 — Score ✅
+Calculate confidence from an explicit formula (35% volume + 20% tightness + 45% gap clarity). Merge duplicate clusters, rank gaps, write `gaps.json`.
 
-### Stage 5 — Score (coming next)
-Calculate a confidence number for each gap using a transparent formula:
-- How many reviews mention it (volume)
-- How tightly clustered those reviews are (coherence)
-- What star ratings they carry (severity)
-- How recently the reviews were written (recency)
-
-No AI opinion. No black box. The formula is code that anyone can read and challenge.
-
-### Stage 6 — Output (coming next)
-Sort all gaps by confidence score, take the top 3–5, and write `gaps.json`. Every gap comes with the full evidence chain: which reviews, which cluster, which issues, what verdict, what score.
+### QA — Quality tester ✅ (QA critic agent, optional)
+After the pipeline, run `make qa`. The **QA critic agent** (Claude) grades each headline gap: is it a latent need or a complaint summary? Writes `data/gaps_qa.json` with pass/warn/fail, pitch tips, and evidence alignment notes. **Does not change scores or ranking.**
 
 ---
 
@@ -95,7 +82,10 @@ Instead we use a method that is **deterministic and auditable at every step**:
 
 - Reviews are grouped by a clustering algorithm — not by AI opinion
 - A confidence score is calculated by an explicit mathematical formula — not estimated
-- The AI is only used for one narrow job: reading a cluster of similar reviews and writing a one-sentence label for what they share
+- **Three Anthropic Claude agents** assist with narrow jobs:
+  - **Label agent** — names each cluster as a plain-language need
+  - **Match agent** — resolves ambiguous roadmap verdicts
+  - **QA critic agent** — tests output quality (latent need vs complaint summary); optional via `make qa`
 - Every output can be traced back to specific review IDs and issue IDs — nothing is vague
 
 This means every gap we surface can be defended with evidence. Not "the AI said so" — but "here are 110 reviews, here is their cluster, here is the formula score, and here is why the roadmap misses this."

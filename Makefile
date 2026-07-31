@@ -12,10 +12,12 @@ refresh:
 viewer:
 	@test -f gaps.json || (echo "ERROR: gaps.json not found. Run 'make run' first." && exit 1)
 	@cp gaps.json viewer/gaps.json
+	@test -f data/gaps_qa.json && cp data/gaps_qa.json viewer/gaps_qa.json || true
 	@echo ""
 	@echo "  Open in browser:"
 	@echo "    Results       →  http://localhost:8000/viewer/"
 	@echo "    Presentation  →  http://localhost:8000/viewer/guide.html"
+	@test -f viewer/gaps_qa.json && echo "    QA grades     →  shown on Results page (from make qa)" || echo "    QA grades     →  run 'make qa' then 'make viewer' to show"
 	@echo ""
 	@echo "  Press Ctrl+C to stop"
 	@echo ""
