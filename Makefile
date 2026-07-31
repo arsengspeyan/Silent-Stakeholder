@@ -10,7 +10,15 @@ refresh:
 
 # Serve the viewer at http://localhost:8000/viewer/
 viewer:
-	@echo "Viewer → http://localhost:8000/viewer/"
+	@test -f gaps.json || (echo "ERROR: gaps.json not found. Run 'make run' first." && exit 1)
+	@cp gaps.json viewer/gaps.json
+	@echo ""
+	@echo "  Open in browser:"
+	@echo "    Results  →  http://localhost:8000/viewer/"
+	@echo "    Guide    →  http://localhost:8000/viewer/guide.html"
+	@echo ""
+	@echo "  Press Ctrl+C to stop"
+	@echo ""
 	python3 -m http.server 8000
 
 # Install all Python dependencies

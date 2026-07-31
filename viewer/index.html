@@ -377,6 +377,12 @@
 </head>
 <body>
   <div class="wrap">
+    <nav style="display:flex;gap:1rem;margin-bottom:1.25rem;font-size:.85rem;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif">
+      <strong>Results</strong>
+      <span style="color:#999">|</span>
+      <a href="guide.html" style="color:#1d4ed8;text-decoration:none">How it works →</a>
+    </nav>
+
     <header>
       <h1>Silent Stakeholder</h1>
       <p id="subtitle">Unmet user needs the PPSSPP roadmap is missing.</p>
@@ -489,12 +495,19 @@ function renderGap(gap, i) {
     </article>`;
 }
 
+async function loadGaps() {
+  // gaps.json is copied into viewer/ by `make viewer`
+  for (const url of ["./gaps.json", "gaps.json"]) {
+    const resp = await fetch(url);
+    if (resp.ok) return resp.json();
+  }
+  throw new Error("gaps.json not found in viewer/ folder");
+}
+
 async function load() {
   const root = document.getElementById("root");
   try {
-    const resp = await fetch("../gaps.json");
-    if (!resp.ok) throw new Error(`HTTP ${resp.status}`);
-    const data = await resp.json();
+    const data = await loadGaps();
 
     const headline = data.headline_gaps || [];
     const rest = (data.all_gaps || []).filter(g => !g.headline);
@@ -525,7 +538,9 @@ async function load() {
       <div class="error">
         Could not load <code>gaps.json</code>.<br><br>
         ${esc(err.message)}<br><br>
-        Run <code>make run</code> then <code>make viewer</code>
+        From the project folder, run:<br>
+        <code>make run</code> then <code>make viewer</code><br><br>
+        Do not open this file directly — use the URL <code>http://localhost:8000</code>
       </div>`;
   }
 }
