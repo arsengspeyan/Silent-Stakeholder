@@ -3,360 +3,529 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Silent Stakeholder — Gap Analysis</title>
+  <title>Silent Stakeholder</title>
   <style>
     *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 
+    :root {
+      --black: #1a1a1a;
+      --gray: #666;
+      --light: #e8e8e8;
+      --page: #fafafa;
+
+      /* verdicts */
+      --ignored-bg: #fef2f2;
+      --ignored-border: #e57373;
+      --ignored-text: #b91c1c;
+
+      --under-bg: #fffbeb;
+      --under-border: #fbbf24;
+      --under-text: #b45309;
+
+      --mis-bg: #eff6ff;
+      --mis-border: #93c5fd;
+      --mis-text: #1d4ed8;
+
+      /* stats */
+      --vol-bg: #f0fdf4;
+      --vol-text: #15803d;
+      --tight-bg: #f5f3ff;
+      --tight-text: #6d28d9;
+      --gap-bg: #fdf4ff;
+      --gap-text: #a21caf;
+    }
+
     body {
-      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
-      background: #ffffff;
-      color: #111111;
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+      background: var(--page);
+      color: var(--black);
       line-height: 1.6;
-      padding: 2.5rem 1.5rem;
+      padding: 2.5rem 1.25rem 4rem;
     }
 
-    .container { max-width: 860px; margin: 0 auto; }
+    .wrap { max-width: 740px; margin: 0 auto; }
 
-    /* ── header ── */
-    header { border-bottom: 2px solid #111; padding-bottom: 1.2rem; margin-bottom: 2rem; }
-    header h1 { font-size: 1.7rem; font-weight: 800; letter-spacing: -.01em; }
-    header p  { color: #555; margin-top: .3rem; font-size: .9rem; }
-    .app-label {
-      display: inline-block;
-      border: 1px solid #ccc;
-      border-radius: 3px;
-      padding: .15rem .6rem;
-      font-size: .75rem;
-      color: #444;
-      margin-top: .5rem;
-      font-family: monospace;
-    }
-
-    /* ── section title ── */
-    .section-title {
-      font-size: .68rem;
-      font-weight: 700;
-      letter-spacing: .12em;
-      text-transform: uppercase;
-      color: #888;
-      margin: 2rem 0 .8rem;
-      border-bottom: 1px solid #eee;
-      padding-bottom: .4rem;
-    }
-
-    /* ── verdict badge ── */
-    .badge {
-      display: inline-block;
-      border: 1px solid #111;
-      border-radius: 2px;
-      padding: .1rem .45rem;
-      font-size: .68rem;
-      font-weight: 700;
-      letter-spacing: .06em;
-      text-transform: uppercase;
+    /* header */
+    header {
       background: #fff;
+      border: 1px solid var(--light);
+      border-left: 4px solid var(--black);
+      padding: 1.5rem 1.25rem;
+      margin-bottom: 2rem;
+    }
+
+    header h1 {
+      font-size: 1.4rem;
+      font-weight: 700;
+      letter-spacing: -0.02em;
+    }
+
+    header p {
+      margin-top: 0.45rem;
+      font-size: 0.9rem;
+      color: var(--gray);
+    }
+
+    .meta-line {
+      margin-top: 0.65rem;
+      font-family: ui-monospace, monospace;
+      font-size: 0.7rem;
+      color: #888;
+    }
+
+    /* sections */
+    .section {
+      margin-bottom: 2rem;
+    }
+
+    .section-headline {
+      background: #fff;
+      border: 1px solid var(--light);
+      padding: 1rem 1.25rem 0.25rem;
+    }
+
+    .section-rest {
+      background: #fff;
+      border: 1px solid var(--light);
+      padding: 1rem 1.25rem 0.25rem;
+      opacity: 0.95;
+    }
+
+    .section-label {
+      font-size: 0.65rem;
+      font-weight: 700;
+      letter-spacing: 0.12em;
+      text-transform: uppercase;
+      color: var(--gray);
+      padding-bottom: 0.75rem;
+      margin-bottom: 0.25rem;
+      border-bottom: 2px solid var(--light);
+    }
+
+    .section-headline .section-label {
+      border-bottom-color: #111;
       color: #111;
     }
-    .badge-MISUNDERSTOOD     { background: #111; color: #fff; }
-    .badge-UNDER-PRIORITIZED { background: #fff; color: #111; }
-    .badge-IGNORED           { background: #fff; color: #111; border-style: dashed; }
 
-    /* ── gap card ── */
-    .gap-card {
-      border: 1px solid #ddd;
-      border-radius: 4px;
-      padding: 1.4rem 1.5rem;
-      margin-bottom: 1rem;
+    /* gap card */
+    .gap {
+      padding: 1.25rem 0 1.25rem 0.85rem;
+      border-bottom: 1px solid var(--light);
+      border-left: 3px solid var(--light);
+      margin-left: -0.85rem;
+      padding-left: calc(0.85rem + 3px);
     }
-    .gap-card.headline { border-color: #111; border-width: 1.5px; }
 
-    .gap-header {
+    .gap:last-child { border-bottom: none; }
+
+    .gap.verdict-IGNORED {
+      border-left-color: var(--ignored-border);
+      background: linear-gradient(90deg, var(--ignored-bg) 0%, #fff 55%);
+    }
+
+    .gap.verdict-UNDER-PRIORITIZED {
+      border-left-color: var(--under-border);
+      background: linear-gradient(90deg, var(--under-bg) 0%, #fff 55%);
+    }
+
+    .gap.verdict-MISUNDERSTOOD {
+      border-left-color: var(--mis-border);
+      background: linear-gradient(90deg, var(--mis-bg) 0%, #fff 55%);
+    }
+
+    .gap-top {
       display: flex;
-      align-items: baseline;
       justify-content: space-between;
+      align-items: flex-start;
       gap: 1rem;
-      margin-bottom: .6rem;
+      margin-bottom: 0.45rem;
     }
-    .gap-rank {
-      font-size: 1.2rem;
-      font-weight: 800;
-      color: #111;
-      min-width: 2rem;
+
+    .gap-title {
+      font-size: 1rem;
+      font-weight: 600;
+      line-height: 1.35;
     }
-    .gap-rank.dim { color: #aaa; font-size: 1rem; }
-    .gap-theme {
+
+    .gap-rank { color: #999; font-weight: 500; }
+
+    .gap-score {
       font-size: 1rem;
       font-weight: 700;
-      color: #111;
-      flex: 1;
-    }
-    .gap-conf {
-      font-size: 1rem;
-      font-weight: 800;
-      color: #111;
       white-space: nowrap;
+      color: #111;
     }
 
     .gap-meta {
       display: flex;
+      flex-wrap: wrap;
       align-items: center;
-      gap: .6rem;
-      margin-bottom: .7rem;
-      font-size: .8rem;
-      color: #555;
+      gap: 0.45rem;
+      margin-bottom: 0.75rem;
+      font-size: 0.72rem;
+      color: var(--gray);
     }
 
-    .gap-need {
-      font-size: .88rem;
+    .verdict {
+      display: inline-block;
+      padding: 0.12rem 0.45rem;
+      border-radius: 3px;
+      font-size: 0.62rem;
+      font-weight: 700;
+      letter-spacing: 0.05em;
+      text-transform: uppercase;
+    }
+
+    .verdict-IGNORED .verdict {
+      background: var(--ignored-bg);
+      color: var(--ignored-text);
+      border: 1px solid var(--ignored-border);
+    }
+
+    .verdict-UNDER-PRIORITIZED .verdict {
+      background: var(--under-bg);
+      color: var(--under-text);
+      border: 1px solid var(--under-border);
+    }
+
+    .verdict-MISUNDERSTOOD .verdict {
+      background: var(--mis-bg);
+      color: var(--mis-text);
+      border: 1px solid var(--mis-border);
+    }
+
+    .gap-quote {
+      font-size: 0.88rem;
       color: #333;
       margin-bottom: 1rem;
-      font-style: italic;
-      border-left: 3px solid #ddd;
-      padding-left: .8rem;
+      padding-left: 0.65rem;
+      border-left: 2px solid var(--light);
     }
 
-    /* ── confidence bar ── */
-    .conf-wrap { margin-bottom: 1rem; }
-    .conf-label {
-      font-size: .65rem;
-      color: #888;
+    /* confidence bar */
+    .bar-row {
+      display: flex;
+      align-items: center;
+      gap: 0.65rem;
+      margin-bottom: 0.65rem;
+    }
+
+    .bar-label {
+      font-size: 0.62rem;
+      font-weight: 600;
+      color: var(--gray);
+      width: 5rem;
+      flex-shrink: 0;
       text-transform: uppercase;
-      letter-spacing: .08em;
-      margin-bottom: .25rem;
+      letter-spacing: 0.06em;
     }
-    .conf-track {
-      background: #f0f0f0;
-      height: 5px;
+
+    .bar-track {
+      flex: 1;
+      height: 4px;
+      background: #eee;
       border-radius: 2px;
     }
-    .conf-fill {
+
+    .bar-fill {
       height: 100%;
-      background: #111;
+      background: #333;
       border-radius: 2px;
     }
 
-    /* ── breakdown ── */
-    .breakdown {
-      display: grid;
-      grid-template-columns: repeat(3, 1fr);
-      gap: .5rem;
-      margin-bottom: 1rem;
-    }
-    .bd-cell {
-      border: 1px solid #eee;
-      border-radius: 3px;
-      padding: .45rem .6rem;
-    }
-    .bd-label { font-size: .62rem; color: #888; text-transform: uppercase; letter-spacing: .07em; }
-    .bd-val   { font-size: .9rem; font-weight: 700; color: #111; margin-top: .1rem; }
-
-    /* ── evidence ── */
-    .ev-toggle {
-      background: #fff;
-      border: 1px solid #ccc;
-      border-radius: 3px;
+    .bar-num {
+      font-size: 0.72rem;
+      font-weight: 600;
       color: #444;
-      font-size: .75rem;
-      padding: .3rem .7rem;
+      width: 2.5rem;
+      text-align: right;
+      flex-shrink: 0;
+    }
+
+    /* stat pills */
+    .stats {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 0.35rem;
+      margin-bottom: 0.75rem;
+    }
+
+    .stat {
+      font-size: 0.68rem;
+      padding: 0.15rem 0.45rem;
+      border-radius: 3px;
+      font-weight: 500;
+    }
+
+    .stat-vol  { background: var(--vol-bg);  color: var(--vol-text); }
+    .stat-tight { background: var(--tight-bg); color: var(--tight-text); }
+    .stat-gap  { background: var(--gap-bg);  color: var(--gap-text); }
+
+    /* evidence */
+    .ev-btn {
+      background: #fff;
+      border: 1px solid var(--light);
+      border-radius: 3px;
+      padding: 0.3rem 0.6rem;
+      font-size: 0.72rem;
+      color: #555;
       cursor: pointer;
     }
-    .ev-toggle:hover { border-color: #111; color: #111; }
 
-    .ev-body { display: none; margin-top: .8rem; }
-    .ev-body.open { display: block; }
+    .ev-btn:hover {
+      border-color: #999;
+      color: #111;
+    }
 
-    .ev-section { margin-bottom: .8rem; }
-    .ev-label {
-      font-size: .62rem;
+    .ev-panel {
+      display: none;
+      margin-top: 0.85rem;
+      padding: 0.85rem;
+      background: #f9f9f9;
+      border: 1px solid var(--light);
+      border-radius: 4px;
+    }
+
+    .ev-panel.open { display: block; }
+
+    .ev-heading {
+      font-size: 0.62rem;
+      font-weight: 700;
+      letter-spacing: 0.1em;
       text-transform: uppercase;
-      letter-spacing: .08em;
       color: #888;
-      margin-bottom: .4rem;
+      margin-bottom: 0.4rem;
     }
 
-    /* ── review cards ── */
-    .review-card {
-      border: 1px solid #eee;
+    .ev-heading + .ev-heading { margin-top: 0.85rem; }
+
+    .review {
+      font-size: 0.82rem;
+      padding: 0.55rem 0.65rem;
+      margin-bottom: 0.35rem;
+      background: #fff;
+      border: 1px solid var(--light);
       border-radius: 3px;
-      padding: .55rem .7rem;
-      margin-bottom: .4rem;
-    }
-    .review-meta { font-size: .65rem; color: #999; margin-bottom: .2rem; font-family: monospace; }
-    .review-text { font-size: .83rem; color: #222; line-height: 1.5; }
-
-    /* ── chips ── */
-    .chip-row { display: flex; flex-wrap: wrap; gap: .3rem; }
-    .chip {
-      border: 1px solid #ddd;
-      border-radius: 2px;
-      padding: .1rem .4rem;
-      font-size: .7rem;
-      color: #444;
-      font-family: monospace;
-    }
-    .chip a { color: #111; text-decoration: none; }
-    .chip a:hover { text-decoration: underline; }
-    .chip-more { color: #aaa; font-style: italic; border-style: dashed; }
-
-    /* ── merged tag ── */
-    .merged-tag {
-      font-size: .65rem;
-      color: #666;
-      border: 1px solid #ccc;
-      border-radius: 2px;
-      padding: .1rem .4rem;
-      margin-left: .5rem;
-      font-weight: 400;
+      line-height: 1.5;
     }
 
-    /* ── meta footer ── */
-    .meta-box {
-      border-top: 1px solid #eee;
-      margin-top: 3rem;
-      padding-top: 1rem;
-      font-size: .78rem;
+    .review-id {
+      font-family: ui-monospace, monospace;
+      font-size: 0.65rem;
       color: #888;
+      margin-bottom: 0.2rem;
     }
 
-    /* ── error ── */
-    .error { border: 1px solid #111; border-radius: 3px; padding: 1rem; color: #111; }
-    .error code { font-family: monospace; background: #f5f5f5; padding: .1rem .3rem; }
+    .ids {
+      font-family: ui-monospace, monospace;
+      font-size: 0.68rem;
+      color: #555;
+      line-height: 1.75;
+      word-break: break-all;
+    }
+
+    .ids a { color: #1d4ed8; text-decoration: none; }
+    .ids a:hover { text-decoration: underline; }
+
+    /* legend */
+    .legend {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 0.5rem 1rem;
+      margin-bottom: 1.5rem;
+      font-size: 0.68rem;
+      color: var(--gray);
+    }
+
+    .legend-item {
+      display: flex;
+      align-items: center;
+      gap: 0.35rem;
+    }
+
+    .legend-dot {
+      width: 10px;
+      height: 10px;
+      border-radius: 2px;
+      flex-shrink: 0;
+    }
+
+    footer {
+      margin-top: 1.5rem;
+      padding: 0.85rem 1rem;
+      background: #fff;
+      border: 1px solid var(--light);
+      font-size: 0.68rem;
+      color: #888;
+      line-height: 1.55;
+    }
+
+    .error {
+      background: #fff;
+      border: 1px solid var(--light);
+      padding: 1.25rem;
+      font-size: 0.88rem;
+    }
+
+    .error code { font-family: ui-monospace, monospace; }
+
+    @media (max-width: 520px) {
+      body { padding: 1.5rem 0.75rem 3rem; }
+      .gap-top { flex-direction: column; gap: 0.2rem; }
+    }
   </style>
 </head>
 <body>
-<div class="container">
+  <div class="wrap">
+    <header>
+      <h1>Silent Stakeholder</h1>
+      <p id="subtitle">Unmet user needs the PPSSPP roadmap is missing.</p>
+      <div class="meta-line">org.ppsspp.ppsspp · hrydgard/ppsspp</div>
+    </header>
 
-  <header>
-    <h1>Silent Stakeholder</h1>
-    <p>Unmet user needs the PPSSPP roadmap is missing — mined from 9,771 reviews vs 4,004 GitHub issues.</p>
-    <span class="app-label">org.ppsspp.ppsspp &nbsp;·&nbsp; hrydgard/ppsspp</span>
-  </header>
+    <div class="legend">
+      <span class="legend-item"><span class="legend-dot" style="background:var(--ignored-border)"></span> Ignored</span>
+      <span class="legend-item"><span class="legend-dot" style="background:var(--under-border)"></span> Under-prioritized</span>
+      <span class="legend-item"><span class="legend-dot" style="background:var(--mis-border)"></span> Misunderstood</span>
+      <span class="legend-item"><span class="legend-dot" style="background:var(--vol-text)"></span> Volume</span>
+      <span class="legend-item"><span class="legend-dot" style="background:var(--tight-text)"></span> Tightness</span>
+      <span class="legend-item"><span class="legend-dot" style="background:var(--gap-text)"></span> Gap clarity</span>
+    </div>
 
-  <div id="root">Loading…</div>
-
-  <div class="meta-box" id="meta-box" style="display:none">
-    Pipeline: reviews → UMAP → HDBSCAN clusters → Claude labels → cosine similarity match → verdicts → confidence formula<br>
-    Formula: (0.35 × log-volume) + (0.20 × tightness) + (0.45 × gap clarity) &nbsp;·&nbsp;
-    Gap clarity: IGNORED 1.0 · UNDER-PRIORITIZED 0.8 · MISUNDERSTOOD 0.6
+    <div id="root">Loading…</div>
+    <footer id="footer" hidden></footer>
   </div>
 
-</div>
-
 <script>
-const GITHUB_REPO = "hrydgard/ppsspp";
+const REPO = "hrydgard/ppsspp";
 
-function badge(v) {
-  return `<span class="badge badge-${v}">${v}</span>`;
+function pct(n) {
+  return (n * 100).toFixed(n === Math.floor(n) ? 0 : 1) + "%";
 }
 
-function confBar(pct) {
+function esc(s) {
+  return String(s || "").replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;");
+}
+
+function verdictClass(v) {
+  return "verdict-" + (v || "IGNORED").replace(/\s+/g, "-");
+}
+
+function bar(value) {
+  const v = Math.min(100, Math.max(0, value * 100));
   return `
-    <div class="conf-wrap">
-      <div class="conf-label">Confidence — ${pct}</div>
-      <div class="conf-track"><div class="conf-fill" style="width:${parseFloat(pct)}%"></div></div>
+    <div class="bar-row">
+      <span class="bar-label">Confidence</span>
+      <div class="bar-track"><div class="bar-fill" style="width:${v}%"></div></div>
+      <span class="bar-num">${v.toFixed(0)}%</span>
     </div>`;
 }
 
-function breakdown(b) {
+function evidence(gap, i) {
+  const ids = gap.evidence.review_ids || [];
+  const issues = gap.evidence.matched_issue_numbers || [];
+  const samples = gap.sample_reviews || [];
+
+  const reviews = samples.map(r => `
+    <div class="review">
+      <div class="review-id">${esc(r.id)} · ${"★".repeat(r.stars||0)}${"☆".repeat(5-(r.stars||0))} · ${esc(r.date||"")}</div>
+      ${esc(r.text)}
+    </div>`).join("");
+
+  const idList = ids.slice(0, 12).map(id => esc(id)).join(", ")
+    + (ids.length > 12 ? `, +${ids.length - 12} more` : "");
+
+  let issueList = "none";
+  if (issues.length) {
+    issueList = issues.slice(0, 8).map(n =>
+      `<a href="https://github.com/${REPO}/issues/${n}" target="_blank">#${n}</a>`
+    ).join(", ");
+    if (issues.length > 8) issueList += `, +${issues.length - 8} more`;
+  }
+
   return `
-    <div class="breakdown">
-      <div class="bd-cell"><div class="bd-label">Volume</div><div class="bd-val">${(b.volume_score*100).toFixed(1)}%</div></div>
-      <div class="bd-cell"><div class="bd-label">Tightness</div><div class="bd-val">${(b.tightness*100).toFixed(1)}%</div></div>
-      <div class="bd-cell"><div class="bd-label">Gap clarity</div><div class="bd-val">${(b.gap_clarity*100).toFixed(0)}%</div></div>
+    <button class="ev-btn" onclick="toggle(${i})" id="btn-${i}">
+      ${ids.length} reviews · ${issues.length} issues — show evidence
+    </button>
+    <div class="ev-panel" id="ev-${i}">
+      ${samples.length ? `<div class="ev-heading">Sample reviews</div>${reviews}` : ""}
+      <div class="ev-heading">Review IDs</div>
+      <div class="ids">${idList || "—"}</div>
+      <div class="ev-heading">GitHub issues</div>
+      <div class="ids">${issueList}</div>
     </div>`;
 }
 
-function evidenceSection(gap, idx) {
-  const reviewIds    = gap.evidence.review_ids || [];
-  const issueNumbers = gap.evidence.matched_issue_numbers || [];
-  const samples      = gap.sample_reviews || [];
-
-  const sampleHtml = samples.map(r => `
-    <div class="review-card">
-      <div class="review-meta">${r.id} · ${'★'.repeat(r.stars||0)}${'☆'.repeat(5-(r.stars||0))} · ${r.date||''}</div>
-      <div class="review-text">${(r.text||'').replace(/</g,'&lt;')}</div>
-    </div>`).join('');
-
-  const idChips = reviewIds.slice(0,10).map(id=>`<span class="chip">${id}</span>`).join('');
-  const idMore  = reviewIds.length>10 ? `<span class="chip chip-more">+${reviewIds.length-10} more</span>` : '';
-
-  const issChips = issueNumbers.slice(0,8).map(n=>
-    `<span class="chip"><a href="https://github.com/${GITHUB_REPO}/issues/${n}" target="_blank">#${n}</a></span>`
-  ).join('');
-  const issMore  = issueNumbers.length>8 ? `<span class="chip chip-more">+${issueNumbers.length-8} more</span>` : '';
-
-  return `
-    <button class="ev-toggle" onclick="toggleEv(${idx})">Show evidence (${reviewIds.length} reviews · ${issueNumbers.length} issues)</button>
-    <div class="ev-body" id="ev-${idx}">
-      <div class="ev-section">
-        <div class="ev-label">What users said</div>
-        ${sampleHtml}
-      </div>
-      <div class="ev-section">
-        <div class="ev-label">Review IDs</div>
-        <div class="chip-row">${idChips}${idMore}</div>
-      </div>
-      <div class="ev-section">
-        <div class="ev-label">Matched GitHub issues</div>
-        <div class="chip-row">${issChips||'<span style="color:#aaa">none</span>'}${issMore}</div>
-      </div>
-    </div>`;
+function toggle(i) {
+  const panel = document.getElementById(`ev-${i}`);
+  const btn = document.getElementById(`btn-${i}`);
+  const open = panel.classList.toggle("open");
+  btn.textContent = btn.textContent.replace(open ? "show" : "hide", open ? "hide" : "show");
 }
 
-function toggleEv(idx) {
-  const el  = document.getElementById(`ev-${idx}`);
-  const btn = el.previousElementSibling;
-  el.classList.toggle('open');
-  btn.textContent = el.classList.contains('open')
-    ? btn.textContent.replace('Show','Hide')
-    : btn.textContent.replace('Hide','Show');
-}
-
-function renderGap(gap, idx, headline) {
-  const mergedTag = gap.merged_from
-    ? `<span class="merged-tag">merged ${gap.merged_from.length} clusters</span>` : '';
+function renderGap(gap, i) {
+  const b = gap.confidence_breakdown || {};
+  const merged = gap.merged_from ? ` · merged ${gap.merged_from.length} clusters` : "";
+  const vc = verdictClass(gap.verdict);
 
   return `
-    <div class="gap-card ${headline?'headline':''}">
-      <div class="gap-header">
-        <div class="gap-rank ${headline?'':'dim'}">#${gap.rank}</div>
-        <div class="gap-theme">${gap.theme}${mergedTag}</div>
-        <div class="gap-conf">${gap.confidence_pct}</div>
+    <article class="gap ${vc}">
+      <div class="gap-top">
+        <div class="gap-title"><span class="gap-rank">#${gap.rank}</span> ${esc(gap.theme)}</div>
+        <div class="gap-score">${gap.confidence_pct}</div>
       </div>
-      <div class="gap-meta">${badge(gap.verdict)} <span>${gap.review_count} reviews</span></div>
-      <p class="gap-need">"${gap.need}"</p>
-      ${confBar(gap.confidence_pct)}
-      ${breakdown(gap.confidence_breakdown)}
-      ${evidenceSection(gap, idx)}
-    </div>`;
+      <div class="gap-meta">
+        <span class="verdict">${gap.verdict}</span>
+        <span>${gap.review_count} reviews${merged}</span>
+      </div>
+      <p class="gap-quote">${esc(gap.need)}</p>
+      ${bar(gap.confidence)}
+      <div class="stats">
+        <span class="stat stat-vol">Volume ${pct(b.volume_score ?? 0)}</span>
+        <span class="stat stat-tight">Tightness ${pct(b.tightness ?? 0)}</span>
+        <span class="stat stat-gap">Gap clarity ${pct(b.gap_clarity ?? 0)}</span>
+      </div>
+      ${evidence(gap, i)}
+    </article>`;
 }
 
 async function load() {
+  const root = document.getElementById("root");
   try {
-    const resp = await fetch('../gaps.json');
+    const resp = await fetch("../gaps.json");
     if (!resp.ok) throw new Error(`HTTP ${resp.status}`);
     const data = await resp.json();
 
     const headline = data.headline_gaps || [];
-    const rest     = (data.all_gaps||[]).filter(g => !g.headline);
+    const rest = (data.all_gaps || []).filter(g => !g.headline);
 
-    let html = `<p class="section-title">Top ${headline.length} unmet needs</p>`;
-    headline.forEach((g,i) => html += renderGap(g, i, true));
+    let html = `
+      <div class="section section-headline">
+        <div class="section-label">Top ${headline.length} unmet needs</div>`;
+    headline.forEach((g, i) => { html += renderGap(g, i); });
+    html += `</div>`;
 
     if (rest.length) {
-      html += `<p class="section-title">All gaps (ranked)</p>`;
-      rest.forEach((g,i) => html += renderGap(g, headline.length+i, false));
+      html += `
+      <div class="section section-rest">
+        <div class="section-label">All gaps</div>`;
+      rest.forEach((g, i) => { html += renderGap(g, headline.length + i); });
+      html += `</div>`;
     }
 
-    document.getElementById('root').innerHTML = html;
-    document.getElementById('meta-box').style.display = 'block';
+    root.innerHTML = html;
 
-  } catch(err) {
-    document.getElementById('root').innerHTML = `
+    const footer = document.getElementById("footer");
+    const m = data.meta || {};
+    footer.innerHTML = `${m.total_gaps ?? "—"} gaps · ${m.headline_count ?? headline.length} headline · confidence = 0.35×volume + 0.2×tightness + 0.45×gap clarity`;
+    footer.hidden = false;
+
+  } catch (err) {
+    root.innerHTML = `
       <div class="error">
-        <strong>Could not load gaps.json</strong><br><br>
-        ${err.message}<br><br>
-        Run: <code>make run</code> then <code>make viewer</code>
+        Could not load <code>gaps.json</code>.<br><br>
+        ${esc(err.message)}<br><br>
+        Run <code>make run</code> then <code>make viewer</code>
       </div>`;
   }
 }
