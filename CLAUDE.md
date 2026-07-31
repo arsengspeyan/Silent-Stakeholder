@@ -8,10 +8,9 @@ Two sides of ONE app:
 Output: top 3–5 latent needs, each with confidence, evidence (IDs), and a verdict.
 
 ## Chosen app
-<!-- fill in once confirmed, e.g. AntennaPod / de.danoeh.antennapod / github AntennaPod/AntennaPod -->
-App: TBD
-Package name: TBD
-GitHub repo: TBD
+App: PPSSPP (PlayStation Portable emulator)
+Package name: org.ppsspp.ppsspp
+GitHub repo: hrydgard/ppsspp
 
 ## The core principle (do not violate)
 This is NOT a complaint summarizer. We infer LATENT needs — patterns across
