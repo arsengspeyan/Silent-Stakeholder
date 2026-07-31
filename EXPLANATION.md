@@ -195,24 +195,110 @@ After Stage 3, every cluster has a name:
 
 ---
 
-## What Is Coming Next
+## Stage 4 — Match (`src/match.py`) ✅ Done
 
-### Stage 4 — Match (`src/match.py`)
-We compare each labeled cluster against the 4,004 GitHub issues using embedding similarity. If the roadmap already addresses a need well, it's not a gap. If it ignores or misunderstands the need — that's a finding.
+Now we have 23 named needs. The question is: does the PPSSPP roadmap address any of them?
 
-Each cluster gets a verdict: **IGNORED**, **UNDER-PRIORITIZED**, or **MISUNDERSTOOD**.
+### How matching works
 
-### Stage 5 — Score (`src/score.py`)
-We calculate a confidence number for each gap using an explicit formula with four components:
-- **Review count** — how many people mentioned it
-- **Cluster tightness** — how coherent the evidence is
-- **Star severity** — proportion of 1–2 star reviews (signals urgency)
-- **Recency** — how recent the reviews are
+We embed each need's text (theme + need sentence) with the same `all-MiniLM-L6-v2` model, then compute cosine similarity against all 4,004 issue embeddings. For each need we take the top-5 most similar issues.
 
-The AI never touches this number. The formula is written in code and can be audited line by line.
+This is pure math — no LLM reading 4,004 issues one by one.
 
-### Stage 6 — Output (`src/pipeline.py`)
-We rank all gaps by confidence score and write `gaps.json`: the top 3–5 unmet needs with full evidence traces — every review ID and issue ID attached.
+### Milestone awareness
+
+We also loaded the 70 milestones and checked their state (open or closed). This matters:
+- **Open milestone** (Future, v1.21, v1.22) → team is actively planning this
+- **Closed milestone** → team already shipped a fix for this issue
+
+If users are still complaining about something the team shipped in a closed milestone, that is the strongest signal of **MISUNDERSTOOD** — the team fixed the wrong thing.
+
+Example: Issue #15469 ("Black screen on Raspberry Pi 3B") was closed in milestone `v1.14.0`. The fix shipped. But Android users are STILL reporting black screens. The team fixed a specific device edge case, not the general problem users experience.
+
+### Verdict rules (code, not LLM)
+
+| Situation | Verdict |
+|---|---|
+| Best similarity < 0.35 — nothing close on the roadmap | **IGNORED** |
+| A matched issue was in a closed milestone (shipped fix, still complained about) | **MISUNDERSTOOD** |
+| Related issues exist but none are actively being worked on | **UNDER-PRIORITIZED** |
+| Active open issues exist — LLM judges if it addresses the real need | **MISUNDERSTOOD** or **addressed** |
+
+The LLM is only called for the last case (ambiguous). All other verdicts come from rules in code.
+
+### Results
+
+| Verdict | Count |
+|---|---|
+| IGNORED | 1 |
+| UNDER-PRIORITIZED | 7 |
+| MISUNDERSTOOD | 15 |
+
+---
+
+## Stage 5 — Score (`src/score.py`) ✅ Done
+
+Every gap gets a confidence score from an explicit formula. The AI never touches this number.
+
+### The formula
+
+```
+confidence = (0.35 × volume_score) + (0.20 × tightness) + (0.45 × gap_clarity)
+```
+
+**Volume score** — log-scaled review count, normalized to [0, 1].
+We use log so that 500 reviews beats 50 meaningfully, but doesn't dominate the formula 10×. Doubling reviews gives diminishing returns.
+
+**Tightness** — the mean cosine similarity within the cluster from Stage 2.
+Tighter cluster = reviews all circle the same specific problem = stronger evidence.
+
+**Gap clarity** — derived from the verdict:
+- IGNORED = 1.00 (clearest gap — nothing on roadmap)
+- UNDER-PRIORITIZED = 0.80 (roadmap knows but deprioritized)
+- MISUNDERSTOOD = 0.60 (roadmap has something but wrong angle)
+
+**Why these weights?** Gap clarity (0.45) is most important — a clear roadmap gap matters most. Volume (0.35) is second — raw user demand is strong signal. Tightness (0.20) is third — a loose cluster with 200 reviews still counts.
+
+### Merging duplicate clusters
+
+Two sets of clusters turned out to represent the same underlying need:
+- `c_18` + `c_06` → both about not knowing how to get game files → merged into "Game acquisition guidance" (309 reviews combined)
+- `c_09` + `c_20` + `c_22` → all facets of "games run poorly" → merged into one entry (513 reviews combined)
+
+Review IDs are unioned, tightness is weighted-averaged, confidence is recomputed on the merged pool.
+
+### Final confidence scores
+
+| Gap | Confidence | Formula |
+|---|---|---|
+| Games run poorly | **81.4%** | (0.35×1.00) + (0.20×0.52) + (0.45×0.80) |
+| Game acquisition guidance | **77.3%** | (0.35×0.92) + (0.20×0.46) + (0.45×0.80) |
+| Game compatibility reliability | **73.4%** | (0.35×0.94) + (0.20×0.67) + (0.45×0.60) |
+| Device compatibility issues | **73.3%** | (0.35×0.84) + (0.20×0.49) + (0.45×0.80) |
+| Game file acquisition | **71.4%** | (0.35×0.96) + (0.20×0.51) + (0.45×0.60) |
+
+Every number is reproducible. A judge can recalculate any score by hand using the inputs stored in `gaps.json`.
+
+---
+
+## Stage 6 — Pipeline + Output ✅ Done
+
+### `make run`
+
+Running `make run` executes all 5 stages in order via `src/pipeline.py`. With caches warm, the full pipeline completes in **~27 seconds**. With `make refresh`, it recomputes everything from scratch.
+
+### `gaps.json`
+
+The final output. Contains:
+- `headline_gaps` — the top 5 distinct unmet needs
+- `all_gaps` — all 19 ranked gaps
+- Full evidence trace per gap: review IDs + matched GitHub issue numbers
+- Confidence breakdown per gap: every input value + the formula string
+- Sample review texts (5 per gap) for quick human verification
+
+### `make viewer`
+
+Starts a local web server at `http://localhost:8000/viewer/`. The viewer reads `gaps.json` and shows each gap with its confidence bar, signal breakdown, verdict badge, sample review texts, and clickable GitHub issue links.
 
 ---
 
@@ -223,13 +309,19 @@ We rank all gaps by confidence score and write `gaps.json`: the top 3–5 unmet 
 | `src/ingest.py` | ✅ Done | Pulls reviews + GitHub data, caches locally |
 | `src/cluster.py` | ✅ Done | Embeds, reduces, clusters — 23 clusters found |
 | `src/label.py` | ✅ Done | Labels all 23 clusters via Claude API |
-| `src/match.py` | Coming | Matches clusters to GitHub issues + assigns verdicts |
-| `src/score.py` | Coming | Confidence formula |
-| `src/pipeline.py` | Coming | Orchestrates all stages → gaps.json |
+| `src/match.py` | ✅ Done | Cosine similarity match + milestone-aware verdicts |
+| `src/score.py` | ✅ Done | Confidence formula + cluster merging + ranking |
+| `src/pipeline.py` | ✅ Done | Orchestrates all stages → gaps.json |
 | `data/reviews.json` | ✅ | 9,771 PPSSPP reviews with stable IDs |
 | `data/embeddings.npy` | ✅ | 9,771 × 384 embedding vectors (cached) |
 | `data/clusters.json` | ✅ | 23 clusters with review IDs and tightness |
 | `data/labeled_clusters.json` | ✅ | 23 clusters with need / theme / summary added |
 | `data/label_cache/` | ✅ | Per-cluster Claude responses (23 JSON files) |
 | `data/issues.json` | ✅ | 4,004 real GitHub issues |
-| `data/milestones.json` | ✅ | 70 GitHub milestones |
+| `data/issue_embeddings.npy` | ✅ | 4,004 × 384 issue vectors (cached) |
+| `data/milestones.json` | ✅ | 70 GitHub milestones (4 open, 66 closed) |
+| `data/matched_needs.json` | ✅ | 23 needs with verdicts + matched issue numbers |
+| `data/match_cache/` | ✅ | Per-cluster LLM verdict responses (cached) |
+| `gaps.json` | ✅ | Final output — 5 headline gaps + 19 total ranked |
+| `viewer/index.html` | ✅ | Browser UI — serve with `make viewer` |
+| `DEFENSE.md` | ✅ | Live defense cheat sheet for judges |
