@@ -57,12 +57,12 @@ EXCLUDED_CLUSTERS = {"c_19"}
 MERGE_GROUPS = [
     {
         "theme":    "Game acquisition guidance",
-        "clusters": ["c_18", "c_06"],
+        "clusters": ["c_18", "c_06", "c_05"],
         "reason":   (
-            "Both clusters express the same need: users cannot find or load game "
-            "files into the emulator. c_18 (224 reviews) focuses on confusion about "
-            "where to get games; c_06 (85 reviews) focuses on not understanding the "
-            "loading flow. Same root cause, same fix."
+            "Three clusters express the same need: users cannot find, obtain, or load "
+            "game files into the emulator. c_18 (224 reviews) — where to get games; "
+            "c_06 (85 reviews) — loading flow confusion; c_05 (207 reviews) — obtaining "
+            "ISO/ROM files. Same root cause, same fix."
         ),
     },
     {

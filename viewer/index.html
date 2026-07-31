@@ -261,6 +261,19 @@
     .stat-tight { background: var(--tight-bg); color: var(--tight-text); }
     .stat-gap  { background: var(--gap-bg);  color: var(--gap-text); }
 
+    .formula-line {
+      font-family: ui-monospace, monospace;
+      font-size: 0.68rem;
+      color: #555;
+      background: #f9f9f9;
+      border: 1px solid var(--light);
+      border-radius: 3px;
+      padding: 0.45rem 0.6rem;
+      margin-bottom: 0.75rem;
+      line-height: 1.5;
+      word-break: break-word;
+    }
+
     /* evidence */
     .ev-btn {
       background: #fff;
@@ -491,6 +504,7 @@ function renderGap(gap, i) {
         <span class="stat stat-tight">Tightness ${pct(b.tightness ?? 0)}</span>
         <span class="stat stat-gap">Gap clarity ${pct(b.gap_clarity ?? 0)}</span>
       </div>
+      ${b.formula ? `<div class="formula-line">${esc(b.formula)}</div>` : ""}
       ${evidence(gap, i)}
     </article>`;
 }

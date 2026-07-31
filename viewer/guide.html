@@ -1,0 +1,305 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>How it works — Silent Stakeholder</title>
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+      background: #fafafa;
+      color: #1a1a1a;
+      line-height: 1.65;
+      padding: 2rem 1.25rem 3rem;
+    }
+    .wrap { max-width: 720px; margin: 0 auto; }
+
+    nav {
+      display: flex;
+      gap: 1rem;
+      margin-bottom: 1.5rem;
+      font-size: 0.85rem;
+    }
+    nav a { color: #1d4ed8; text-decoration: none; }
+    nav a:hover { text-decoration: underline; }
+    nav span { color: #999; }
+
+    h1 { font-size: 1.5rem; margin-bottom: 0.35rem; }
+    .sub { color: #666; font-size: 0.9rem; margin-bottom: 2rem; }
+
+    .box {
+      background: #fff;
+      border: 1px solid #e8e8e8;
+      border-radius: 6px;
+      padding: 1.25rem;
+      margin-bottom: 1.25rem;
+    }
+    .box h2 {
+      font-size: 0.7rem;
+      text-transform: uppercase;
+      letter-spacing: 0.1em;
+      color: #888;
+      margin-bottom: 0.75rem;
+    }
+    .box h3 {
+      font-size: 1rem;
+      margin-bottom: 0.5rem;
+    }
+    .box p, .box li { font-size: 0.88rem; color: #333; }
+    .box ul { padding-left: 1.2rem; margin-top: 0.5rem; }
+    .box li { margin-bottom: 0.35rem; }
+
+    /* flow diagram */
+    .flow {
+      display: flex;
+      flex-direction: column;
+      gap: 0;
+      margin: 1rem 0;
+    }
+    .flow-step {
+      display: flex;
+      align-items: stretch;
+      gap: 0.75rem;
+    }
+    .flow-num {
+      width: 28px;
+      height: 28px;
+      border-radius: 50%;
+      background: #111;
+      color: #fff;
+      font-size: 0.75rem;
+      font-weight: 700;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      flex-shrink: 0;
+      margin-top: 0.15rem;
+    }
+    .flow-body {
+      flex: 1;
+      padding-bottom: 1rem;
+      border-left: 2px solid #e8e8e8;
+      margin-left: 13px;
+      padding-left: 1.25rem;
+      margin-top: -2px;
+    }
+    .flow-step:last-child .flow-body { border-left-color: transparent; padding-bottom: 0; }
+    .flow-title { font-weight: 600; font-size: 0.92rem; }
+    .flow-desc { font-size: 0.82rem; color: #555; margin-top: 0.2rem; }
+    .flow-file {
+      font-family: ui-monospace, monospace;
+      font-size: 0.72rem;
+      color: #1d4ed8;
+      margin-top: 0.35rem;
+    }
+    .flow-out {
+      font-family: ui-monospace, monospace;
+      font-size: 0.72rem;
+      color: #15803d;
+      margin-top: 0.2rem;
+    }
+
+    /* command block */
+    .cmd {
+      background: #111;
+      color: #eee;
+      font-family: ui-monospace, monospace;
+      font-size: 0.78rem;
+      padding: 0.85rem 1rem;
+      border-radius: 4px;
+      margin: 0.75rem 0;
+      line-height: 1.7;
+    }
+    .cmd .comment { color: #888; }
+
+    /* formula */
+    .formula {
+      background: #f5f5f5;
+      border-left: 4px solid #111;
+      padding: 0.85rem 1rem;
+      font-family: ui-monospace, monospace;
+      font-size: 0.85rem;
+      margin: 0.75rem 0;
+    }
+
+    .tag {
+      display: inline-block;
+      font-size: 0.65rem;
+      font-weight: 600;
+      padding: 0.1rem 0.4rem;
+      border-radius: 3px;
+      margin-right: 0.25rem;
+    }
+    .tag-code { background: #eff6ff; color: #1d4ed8; }
+    .tag-web { background: #f0fdf4; color: #15803d; }
+    .tag-data { background: #fffbeb; color: #b45309; }
+
+    .start-here {
+      border-left: 4px solid #1d4ed8;
+    }
+  </style>
+</head>
+<body>
+  <div class="wrap">
+    <nav>
+      <a href="index.html">← Results</a>
+      <span>|</span>
+      <strong>How it works</strong>
+    </nav>
+
+    <h1>How to understand this project</h1>
+    <p class="sub">Read this page first. Then open Results. You don't need to read all the code.</p>
+
+    <!-- START HERE -->
+    <div class="box start-here">
+      <h2>Start here — what to open</h2>
+      <ul>
+        <li><span class="tag tag-web">Web</span> <strong>This page</strong> — understand the pipeline</li>
+        <li><span class="tag tag-web">Web</span> <a href="index.html">Results page</a> — see the top 5 gaps (what judges see)</li>
+        <li><span class="tag tag-data">Data</span> <code>gaps.json</code> — raw output with all IDs and scores</li>
+        <li><span class="tag tag-code">Code</span> Only if curious: <code>src/score.py</code> (formula) and <code>DEFENSE.md</code> (judge answers)</li>
+      </ul>
+    </div>
+
+    <!-- MAKE VIEWER -->
+    <div class="box">
+      <h2>What happens when you run <code>make viewer</code></h2>
+      <div class="cmd">
+        make viewer<br>
+        <span class="comment"># Step 1: copies gaps.json → viewer/gaps.json</span><br>
+        <span class="comment"># Step 2: starts web server from project folder</span><br>
+        <span class="comment"># Step 3: open http://localhost:8000/viewer/</span>
+      </div>
+      <p><strong>That's it.</strong> No AI runs. No pipeline runs. It just shows the results file in a nice page.</p>
+      <ul>
+        <li>The server runs on <strong>your computer only</strong> (localhost)</li>
+        <li>The Results page reads <code>gaps.json</code> and draws the cards</li>
+        <li>Click "show evidence" to see sample reviews and GitHub issue links</li>
+        <li>Press <strong>Ctrl+C</strong> in the terminal to stop the server</li>
+      </ul>
+    </div>
+
+    <!-- MAKE RUN -->
+    <div class="box">
+      <h2>What happens when you run <code>make run</code></h2>
+      <p>This runs the <strong>full pipeline</strong> — all 5 stages. Takes a few minutes first time, faster after (cached).</p>
+      <div class="cmd">
+        make run<br>
+        <span class="comment"># ingest → cluster → label → match → score → gaps.json</span>
+      </div>
+      <p>After it finishes, run <code>make viewer</code> to see the new results.</p>
+    </div>
+
+    <!-- BIG PICTURE -->
+    <div class="box">
+      <h2>The big picture</h2>
+      <p>Two data sources go in. One ranked list comes out.</p>
+      <div class="cmd" style="background:#f5f5f5;color:#333;border:1px solid #e8e8e8">
+        User reviews (HuggingFace)  ──┐<br>
+                                      ├──► 5 stages  ──►  gaps.json  ──►  Results page<br>
+        GitHub issues (roadmap)   ──┘
+      </div>
+    </div>
+
+    <!-- 5 PARTS -->
+    <div class="box">
+      <h2>The 5 parts — one at a time</h2>
+
+      <div class="flow">
+        <div class="flow-step">
+          <div class="flow-num">1</div>
+          <div class="flow-body">
+            <div class="flow-title">Ingest — get the data</div>
+            <div class="flow-desc">Download PPSSPP reviews + GitHub issues. Give every item an ID like rev_0001 or issue #1823.</div>
+            <div class="flow-file">Code: src/ingest.py</div>
+            <div class="flow-out">→ data/reviews.json, data/issues.json</div>
+          </div>
+        </div>
+
+        <div class="flow-step">
+          <div class="flow-num">2</div>
+          <div class="flow-body">
+            <div class="flow-title">Cluster — group similar reviews</div>
+            <div class="flow-desc">Turn each review into numbers (embeddings). Group reviews that mean similar things. No AI here — pure math.</div>
+            <div class="flow-file">Code: src/cluster.py</div>
+            <div class="flow-out">→ data/clusters.json (23 groups)</div>
+          </div>
+        </div>
+
+        <div class="flow-step">
+          <div class="flow-num">3</div>
+          <div class="flow-body">
+            <div class="flow-title">Label — name each group</div>
+            <div class="flow-desc">Claude reads sample reviews from each cluster and writes one sentence: "what do these users actually need?"</div>
+            <div class="flow-file">Code: src/label.py</div>
+            <div class="flow-out">→ data/labeled_clusters.json</div>
+          </div>
+        </div>
+
+        <div class="flow-step">
+          <div class="flow-num">4</div>
+          <div class="flow-body">
+            <div class="flow-title">Match — compare to GitHub roadmap</div>
+            <div class="flow-desc">For each need, find similar GitHub issues. Decide: IGNORED, UNDER-PRIORITIZED, or MISUNDERSTOOD.</div>
+            <div class="flow-file">Code: src/match.py</div>
+            <div class="flow-out">→ data/matched_needs.json</div>
+          </div>
+        </div>
+
+        <div class="flow-step">
+          <div class="flow-num">5</div>
+          <div class="flow-body">
+            <div class="flow-title">Score — calculate confidence & rank</div>
+            <div class="flow-desc">Run the formula. Pick top 5. Write gaps.json.</div>
+            <div class="flow-file">Code: src/score.py</div>
+            <div class="flow-out">→ gaps.json (final output)</div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- FORMULA -->
+    <div class="box">
+      <h2>The confidence formula (memorize this)</h2>
+      <div class="formula">
+        confidence = (0.35 × volume) + (0.20 × tightness) + (0.45 × gap_clarity)
+      </div>
+      <ul>
+        <li><strong>Volume</strong> — how many reviews? (513 reviews = max score for gap #1)</li>
+        <li><strong>Tightness</strong> — do reviews say the same thing? (0.52 = somewhat varied wording)</li>
+        <li><strong>Gap clarity</strong> — how much does roadmap miss this? IGNORED=1.0, UNDER-PRIORITIZED=0.8, MISUNDERSTOOD=0.6</li>
+      </ul>
+      <p style="margin-top:0.75rem"><strong>Gap #1 example:</strong></p>
+      <div class="formula">
+        (0.35 × 0.9991) + (0.20 × 0.5189) + (0.45 × 0.80) = <strong>81.3%</strong>
+      </div>
+      <p>The AI never picks this number. Code in score.py calculates it.</p>
+    </div>
+
+    <!-- VERDICTS -->
+    <div class="box">
+      <h2>Three verdicts — simple meanings</h2>
+      <ul>
+        <li><strong style="color:#b91c1c">IGNORED</strong> — GitHub has nothing about this need</li>
+        <li><strong style="color:#b45309">UNDER-PRIORITIZED</strong> — issues exist but team isn't actively working on it</li>
+        <li><strong style="color:#1d4ed8">MISUNDERSTOOD</strong> — team is working on it, but fixing the wrong thing</li>
+      </ul>
+    </div>
+
+    <!-- WHO DECIDES -->
+    <div class="box">
+      <h2>Who decides what?</h2>
+      <ul>
+        <li><strong>Algorithm</strong> — which reviews group together, confidence score, ranking</li>
+        <li><strong>AI (Claude)</strong> — only names clusters and helps with tricky verdicts</li>
+        <li><strong>You (for defense)</strong> — explain why the numbers make sense</li>
+      </ul>
+    </div>
+
+    <nav style="margin-top:2rem">
+      <a href="index.html">See the results →</a>
+    </nav>
+  </div>
+</body>
+</html>

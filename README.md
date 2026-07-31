@@ -2,37 +2,59 @@
 
 Find unmet user needs that a product's roadmap is missing — by mining app reviews against GitHub issues.
 
+**App analyzed:** PPSSPP (`org.ppsspp.ppsspp`) vs `hrydgard/ppsspp` on GitHub.
+
 ## How to run
 
 ```bash
 cp .env.example .env
 # fill in ANTHROPIC_API_KEY and GITHUB_TOKEN in .env
 pip install -r requirements.txt
-make run
+make run      # build gaps.json (uses caches where available)
+make viewer   # open results in browser
 ```
 
-> **Note:** Pipeline not yet implemented. `make run` currently prints a placeholder.
+Then open:
+- **Results:** http://localhost:8000/viewer/
+- **Guide:** http://localhost:8000/viewer/guide.html
+
+Press `Ctrl+C` to stop the server.
+
+To recompute everything from scratch: `make refresh`
 
 ## Architecture
 
-The pipeline runs five deterministic stages. The LLM is a helper at stage 3 only — it never decides rankings or confidence scores.
+Five deterministic stages. The LLM names clusters and helps with ambiguous verdicts — it **never** decides rankings or confidence scores.
 
-1. **Ingest** — Pull app reviews from `sealuzh/app_reviews` (HuggingFace) and GitHub issues/milestones via `api.github.com`. Assign every item a stable ID.
+| Stage | Script | Output |
+|---|---|---|
+| 1. Ingest | `src/ingest.py` | `data/reviews.json`, `data/issues.json`, `data/milestones.json` |
+| 2. Cluster | `src/cluster.py` | `data/clusters.json` |
+| 3. Label | `src/label.py` | `data/labeled_clusters.json` |
+| 4. Match | `src/match.py` | `data/matched_needs.json` |
+| 5. Score | `src/score.py` | `gaps.json` |
 
-2. **Cluster** — Embed reviews locally with `sentence-transformers`. Cluster embeddings with HDBSCAN to surface candidate themes. Cluster membership is ground truth — not LLM opinion.
+## Confidence formula
 
-3. **Label** — Call the Anthropic API (claude-sonnet-4-6) to name each cluster as a plain-language latent need. All LLM calls are cached to disk (hash → JSON) so re-runs are free.
+```
+confidence = (0.35 × volume) + (0.20 × tightness) + (0.45 × gap_clarity)
+```
 
-4. **Match** — Compare each labeled theme to GitHub issues via embedding similarity. Assign a verdict from issue labels/status: `IGNORED` | `UNDER-PRIORITIZED` | `MISUNDERSTOOD`.
+- **Volume** — log-scaled review count
+- **Tightness** — mean similarity within cluster
+- **Gap clarity** — IGNORED=1.0, UNDER-PRIORITIZED=0.8, MISUNDERSTOOD=0.6
 
-5. **Score** — Compute a deterministic confidence score per gap using an explicit formula (review count, cluster tightness, star severity, recency). The LLM never touches this number.
-
-6. **Emit** — Rank gaps by confidence and write `gaps.json` with full evidence traces (review IDs + issue IDs).
+Defined in `src/score.py`. Every score in `gaps.json` includes the full formula breakdown.
 
 ## Output
 
-`gaps.json` — top 3–5 latent needs, each with:
-- `need`: plain-language description
-- `confidence`: float from the formula
-- `evidence`: specific review IDs + roadmap issue IDs
-- `verdict`: `IGNORED` | `UNDER-PRIORITIZED` | `MISUNDERSTOOD`
+`gaps.json` — top 5 headline gaps + 19 ranked total, each with:
+- `need` — plain-language latent need
+- `confidence` / `confidence_pct` — from the formula
+- `confidence_breakdown.formula` — auditable calculation string
+- `evidence.review_ids` + `evidence.matched_issue_numbers`
+- `verdict` — `IGNORED` | `UNDER-PRIORITIZED` | `MISUNDERSTOOD`
+
+## Live defense
+
+See `DEFENSE.md` for judge Q&A with exact numbers from the output.
