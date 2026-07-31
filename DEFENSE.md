@@ -8,7 +8,7 @@ Quick answers to the questions judges will ask. Numbers are from the actual outp
 
 ## "Walk me through what you built."
 
-We built a 5-stage pipeline:
+The project is a 5-stage pipeline:
 1. **Ingest** — 9,771 PPSSPP reviews + 4,004 GitHub issues + 70 milestones
 2. **Cluster** — embed reviews locally (all-MiniLM-L6-v2), compress with UMAP, cluster with HDBSCAN → 23 clusters
 3. **Label** — Claude reads a sample of each cluster and names the latent need (one sentence)
@@ -28,7 +28,7 @@ Three clusters were merged because they describe the same root need:
 - c_20: 175 reviews about general emulator slowness
 - c_22: 106 reviews about frame-rate lag
 
-**Total: 513 reviews** — the largest pool of evidence in our dataset.
+**Total: 513 reviews** — the largest pool of evidence in the dataset.
 
 The roadmap (issues #14349, #15281, #14074) acknowledges these problems but matched issues are **closed with no active milestone** — the team knows about this but isn't actively working on it. That's UNDER-PRIORITIZED.
 
@@ -51,7 +51,7 @@ The tightness score pulls it down. Tightness = 0.52. Reviews talk about differen
 
 **Gap #3: "Game compatibility reliability" — 73.4% confidence, MISUNDERSTOOD**
 
-The roadmap has issue #18761 ("Feature Request: System Support") which is an active, open issue. Because an active issue exists, we used Claude to decide: does this issue address the same need users have?
+The roadmap has issue #18761 ("Feature Request: System Support") which is an active, open issue. Because an active issue exists, Claude is used to decide: does this issue address the same need users have?
 
 Claude's verdict: MISUNDERSTOOD — the roadmap issue is about generic system support, while users need reliable gameplay across a wide range of specific games. The roadmap is working on infrastructure; users need game-by-game fixes.
 
@@ -82,9 +82,9 @@ Same root need — merged into one gap with 516 reviews at 80.5%. Documented in 
 
 **Complaint** (what anyone can see): "Users often mention lag" — count keywords.
 
-**Latent need** (what we surface): Users say different things — "GTA runs at 15fps," "god of war crashes on my samsung," "too slow on my phone." No one said "optimize for mid-range Android."
+**Latent need** (what the system surfaces): Users say different things — "GTA runs at 15fps," "god of war crashes on my samsung," "too slow on my phone." No one said "optimize for mid-range Android."
 
-Our **clustering** found these reviews are mathematically close in embedding space — circling the same underlying problem with different words. The cluster membership is the proof.
+**Clustering** groups these reviews as mathematically close in embedding space — circling the same underlying problem with different words. Cluster membership is the proof.
 
 ---
 
@@ -92,7 +92,7 @@ Our **clustering** found these reviews are mathematically close in embedding spa
 
 1. **Check the full ranked list** (18 gaps total, not just top 5). It might be ranked #8 or #12.
 2. **If truly missing:** probably in HDBSCAN noise — reviews that don't fit a strong cluster (min 30 reviews to form one).
-3. **Honest answer:** "We prioritize evidence strength over coverage. A need in fewer than ~30 similar reviews won't form a cluster."
+3. **Honest answer:** "The pipeline prioritizes evidence strength over coverage. A need in fewer than ~30 similar reviews won't form a cluster."
 
 ---
 

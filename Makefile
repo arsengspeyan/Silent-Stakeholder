@@ -14,8 +14,8 @@ viewer:
 	@cp gaps.json viewer/gaps.json
 	@echo ""
 	@echo "  Open in browser:"
-	@echo "    Results  →  http://localhost:8000/viewer/"
-	@echo "    Guide    →  http://localhost:8000/viewer/guide.html"
+	@echo "    Results       →  http://localhost:8000/viewer/"
+	@echo "    Presentation  →  http://localhost:8000/viewer/guide.html"
 	@echo ""
 	@echo "  Press Ctrl+C to stop"
 	@echo ""
