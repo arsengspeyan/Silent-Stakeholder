@@ -133,7 +133,15 @@
     }
     .dots a { width: 8px; height: 8px; border-radius: 50%; background: #ccc; display: block; }
     .dots a.active { background: #111; transform: scale(1.3); }
-    @media (max-width: 768px) { .dots { display: none; } }
+    .flow-diagram-title {
+      font-size: .65rem; font-weight: 700; letter-spacing: .12em;
+      text-transform: uppercase; color: #888; margin-bottom: .5rem; text-align: center;
+    }
+    .mermaid-flow {
+      background: var(--card); border: 1px solid var(--border); border-radius: 8px;
+      padding: 1rem .5rem; overflow-x: auto; text-align: center;
+    }
+    .mermaid-flow svg { max-width: 100%; height: auto; }
 
     code { font-family: ui-monospace, monospace; font-size: .85em; background: #f0f0f0; padding: .1rem .3rem; border-radius: 3px; }
   </style>
@@ -260,10 +268,97 @@
     </div>
   </section>
 
-  <!-- SLIDE 4 -->
+  <!-- SLIDE 4: End-to-end flow -->
   <section class="slide" id="s4">
     <div class="slide-inner">
-      <div class="slide-num">Slide 4 — Pipeline overview</div>
+      <div class="slide-num">Slide 4 — End-to-end flow</div>
+      <h1>From raw data to ranked gaps</h1>
+
+      <p>Two external sources feed one pipeline. Five stages transform them into a ranked list of unmet needs. The web viewer reads the final file — no processing at display time.</p>
+
+      <div class="diagram mermaid-flow">
+        <p class="flow-diagram-title">End-to-end flow</p>
+        <pre class="mermaid">
+%%{init: {'theme': 'base', 'themeVariables': {'lineColor': '#2563eb', 'primaryColor': '#dbeafe', 'primaryBorderColor': '#2563eb', 'primaryTextColor': '#1e3a5f', 'secondaryColor': '#fef3c7', 'tertiaryColor': '#f0fdf4'}}}%%
+flowchart TB
+    subgraph Sources["Data sources"]
+        HF["HuggingFace<br/>sealuzh/app_reviews"]
+        GH["GitHub API<br/>hrydgard/ppsspp"]
+    end
+
+    subgraph Stage1["Stage 1 — Ingest (ingest.py)"]
+        direction TB
+        S1A["Filter to PPSSPP reviews"]
+        S1B["Sort → assign stable IDs<br/>rev_0001, rev_0002, …"]
+        S1C["Fetch issues (drop PRs)"]
+        S1D["Fetch milestones"]
+    end
+
+    subgraph Cache1["Cached outputs"]
+        R["data/reviews.json<br/>~9,771 reviews"]
+        I["data/issues.json<br/>~4,004 issues"]
+        M["data/milestones.json<br/>~70 milestones"]
+    end
+
+    subgraph Stage2["Stage 2 — Cluster (cluster.py)"]
+        direction TB
+        S2A["Embed text locally<br/>sentence-transformers<br/>(384-dim vectors)"]
+        S2B["Filter reviews &lt; 50 chars<br/>drop 'Good', 'Nice', etc."]
+        S2C["UMAP reduce<br/>384 → 10 dimensions"]
+        S2D["HDBSCAN cluster<br/>density-based grouping"]
+        S2E["Compute tightness<br/>per cluster"]
+    end
+
+    subgraph Cache2["Cached outputs"]
+        E["data/embeddings.npy<br/>(9771 × 384)"]
+        C["data/clusters.json<br/>cluster_id, review_ids,<br/>size, tightness"]
+    end
+
+    subgraph Stages35["Stages 3–5 (label · match · score)"]
+        direction LR
+        L["Label<br/>LLM names each cluster"]
+        Ma["Match<br/>theme ↔ GitHub issues"]
+        Sc["Score<br/>confidence formula"]
+        Out["gaps.json<br/>top 3–5 unmet needs"]
+    end
+
+    Viewer["Results viewer<br/>make viewer"]
+
+    HF --> S1A --> S1B --> R
+    GH --> S1C --> I
+    GH --> S1D --> M
+
+    R --> S2A --> E
+    S2A --> S2B --> S2C --> S2D --> S2E --> C
+
+    C --> L --> Ma
+    I --> Ma
+    M --> Ma
+    Ma --> Sc --> Out --> Viewer
+
+    style Stage1 fill:#dbeafe,stroke:#2563eb,stroke-width:2px
+    style Stage2 fill:#dbeafe,stroke:#2563eb,stroke-width:2px
+    style Stages35 fill:#dbeafe,stroke:#2563eb,stroke-width:2px
+    style Out fill:#bbf7d0,stroke:#16a34a,stroke-width:3px
+    style Viewer fill:#bbf7d0,stroke:#16a34a,stroke-width:3px
+    style Sources fill:#fef3c7,stroke:#f59e0b,stroke-width:2px
+    style Cache1 fill:#f0fdf4,stroke:#16a34a,stroke-width:2px
+    style Cache2 fill:#f0fdf4,stroke:#16a34a,stroke-width:2px
+
+    linkStyle default stroke:#2563eb,stroke-width:3px
+        </pre>
+      </div>
+
+      <div class="highlight">
+        <code>make run</code> executes the full chain left-to-right and writes <code>gaps.json</code>. <code>make viewer</code> copies that file and serves the Results page — the pipeline does not run again at demo time.
+      </div>
+    </div>
+  </section>
+
+  <!-- SLIDE 5 -->
+  <section class="slide" id="s5">
+    <div class="slide-inner">
+      <div class="slide-num">Slide 5 — Pipeline overview</div>
       <h1>Five stages. One ranked output.</h1>
 
       <p>The pipeline is a chain of five independent Python scripts orchestrated by <code>src/pipeline.py</code>. Run everything with <code>make run</code>. Each stage caches its output — re-runs skip work already done.</p>
@@ -342,10 +437,10 @@
     </div>
   </section>
 
-  <!-- SLIDE 5 -->
-  <section class="slide" id="s5">
+  <!-- SLIDE 6 -->
+  <section class="slide" id="s6">
     <div class="slide-inner">
-      <div class="slide-num">Slide 5 — Stages 1 &amp; 2</div>
+      <div class="slide-num">Slide 6 — Stages 1 &amp; 2</div>
       <h1>Ingest + Cluster — finding patterns in noise</h1>
 
       <div class="two-col">
@@ -398,10 +493,10 @@
     </div>
   </section>
 
-  <!-- SLIDE 6 -->
-  <section class="slide" id="s6">
+  <!-- SLIDE 7 -->
+  <section class="slide" id="s7">
     <div class="slide-inner">
-      <div class="slide-num">Slide 6 — Stages 3, 4 &amp; 5</div>
+      <div class="slide-num">Slide 7 — Stages 3, 4 &amp; 5</div>
       <h1>Label + Match + Score — from groups to ranked gaps</h1>
 
       <div class="card">
@@ -431,10 +526,10 @@
     </div>
   </section>
 
-  <!-- SLIDE 7 -->
-  <section class="slide" id="s7">
+  <!-- SLIDE 8 -->
+  <section class="slide" id="s8">
     <div class="slide-inner">
-      <div class="slide-num">Slide 7 — Confidence formula</div>
+      <div class="slide-num">Slide 8 — Confidence formula</div>
       <h1>Every percentage comes from code — not AI opinion</h1>
 
       <p>Each gap gets a confidence score from an explicit formula with three inputs. Weights are constants at the top of <code>score.py</code> — change them and re-run in seconds. The full calculation string is stored in every gap record and shown on the Results page.</p>
@@ -476,10 +571,10 @@
     </div>
   </section>
 
-  <!-- SLIDE 8 -->
-  <section class="slide" id="s8">
+  <!-- SLIDE 9 -->
+  <section class="slide" id="s9">
     <div class="slide-inner">
-      <div class="slide-num">Slide 8 — Verdicts</div>
+      <div class="slide-num">Slide 9 — Verdicts</div>
       <h1>Three verdicts — what the roadmap is doing wrong</h1>
 
       <p>Every gap gets exactly one verdict comparing the user need against the closest GitHub issues. Verdicts are assigned by rules in <code>match.py</code>, using issue state, milestone status, staleness, and similarity score.</p>
@@ -511,10 +606,10 @@
     </div>
   </section>
 
-  <!-- SLIDE 9 -->
-  <section class="slide" id="s9">
+  <!-- SLIDE 10 -->
+  <section class="slide" id="s10">
     <div class="slide-inner">
-      <div class="slide-num">Slide 9 — Results</div>
+      <div class="slide-num">Slide 10 — Results</div>
       <h1>Top 5 unmet needs — PPSSPP</h1>
 
       <p>Ranked by confidence formula. Strongest evidence first. Each row links to hundreds of review IDs and matched GitHub issues in the full output.</p>
@@ -545,10 +640,10 @@
     </div>
   </section>
 
-  <!-- SLIDE 10 -->
-  <section class="slide" id="s10">
+  <!-- SLIDE 11 -->
+  <section class="slide" id="s11">
     <div class="slide-inner">
-      <div class="slide-num">Slide 10 — Summary &amp; demo</div>
+      <div class="slide-num">Slide 11 — Summary &amp; demo</div>
       <h1>What Silent Stakeholder delivers</h1>
 
       <div class="card">
@@ -585,6 +680,10 @@
     </div>
   </section>
 
+<script src="https://cdn.jsdelivr.net/npm/mermaid@10/dist/mermaid.min.js"></script>
+<script>
+mermaid.initialize({ startOnLoad: true, securityLevel: 'loose', flowchart: { curve: 'basis' } });
+</script>
 <script>
 const slides = [...document.querySelectorAll('.slide')];
 const indicator = document.getElementById('indicator');
