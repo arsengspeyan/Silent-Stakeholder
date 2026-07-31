@@ -1,0 +1,669 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Silent Stakeholder — Results</title>
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --black: #111;
+      --gray: #666;
+      --muted: #999;
+      --light: #e8e8e8;
+      --page: #f4f4f5;
+      --card: #fff;
+      --accent: #1d4ed8;
+
+      --ignored-bg: #fef2f2; --ignored-border: #fca5a5; --ignored-text: #b91c1c;
+      --under-bg: #fffbeb;   --under-border: #fcd34d;  --under-text: #b45309;
+      --mis-bg: #eff6ff;     --mis-border: #93c5fd;    --mis-text: #1d4ed8;
+
+      --vol: #15803d; --tight: #6d28d9; --gapc: #a21caf;
+      --nav-h: 3.25rem;
+    }
+
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+      background: var(--page);
+      color: var(--black);
+      line-height: 1.55;
+      padding-top: var(--nav-h);
+    }
+
+    /* ── top nav ── */
+    .topnav {
+      position: fixed; top: 0; left: 0; right: 0; z-index: 200;
+      height: var(--nav-h);
+      background: rgba(255,255,255,.92);
+      backdrop-filter: blur(8px);
+      border-bottom: 1px solid var(--light);
+      display: flex; align-items: center; justify-content: space-between;
+      padding: 0 1.25rem;
+    }
+    .topnav-brand { font-weight: 700; font-size: .9rem; letter-spacing: -.02em; }
+    .topnav-links { display: flex; gap: .25rem; font-size: .82rem; }
+    .topnav-links a {
+      padding: .35rem .65rem; border-radius: 4px; text-decoration: none; color: var(--gray);
+    }
+    .topnav-links a:hover { background: #f0f0f0; color: var(--black); }
+    .topnav-links a.active { background: var(--black); color: #fff; }
+
+    .wrap { max-width: 920px; margin: 0 auto; padding: 1.75rem 1.25rem 4rem; }
+
+    /* ── hero ── */
+    .hero {
+      background: var(--card);
+      border: 1px solid var(--light);
+      border-radius: 8px;
+      padding: 1.5rem 1.35rem;
+      margin-bottom: 1.25rem;
+    }
+    .hero h1 { font-size: 1.55rem; font-weight: 800; letter-spacing: -.03em; }
+    .hero-sub { margin-top: .35rem; color: var(--gray); font-size: .92rem; max-width: 36rem; }
+    .hero-meta {
+      margin-top: .6rem;
+      font-family: ui-monospace, monospace;
+      font-size: .68rem;
+      color: var(--muted);
+    }
+
+    /* ── stats grid ── */
+    .stats-grid {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: .65rem;
+      margin-top: 1.25rem;
+    }
+    .stat-card {
+      background: #fafafa;
+      border: 1px solid var(--light);
+      border-radius: 6px;
+      padding: .75rem .85rem;
+    }
+    .stat-val { font-size: 1.35rem; font-weight: 800; letter-spacing: -.02em; line-height: 1.1; }
+    .stat-lbl {
+      font-size: .62rem; font-weight: 600; text-transform: uppercase;
+      letter-spacing: .08em; color: var(--muted); margin-top: .2rem;
+    }
+
+    /* ── pipeline strip ── */
+    .pipeline {
+      display: flex; align-items: stretch; gap: 0;
+      background: var(--card);
+      border: 1px solid var(--light);
+      border-radius: 8px;
+      overflow-x: auto;
+      margin-bottom: 1.25rem;
+      font-size: .68rem;
+    }
+    .pipe-step {
+      flex: 1; min-width: 5.5rem;
+      padding: .7rem .5rem;
+      text-align: center;
+      border-right: 1px solid var(--light);
+      position: relative;
+    }
+    .pipe-step:last-child { border-right: none; }
+    .pipe-step strong { display: block; font-size: .62rem; text-transform: uppercase; letter-spacing: .06em; color: var(--muted); }
+    .pipe-step span { display: block; margin-top: .15rem; font-weight: 600; font-size: .72rem; }
+    .pipe-step.done { background: #f0fdf4; }
+    .pipe-step.ai { background: #fffbeb; }
+    .pipe-step.out { background: #eff6ff; }
+
+    /* ── toolbar ── */
+    .toolbar {
+      display: flex; flex-wrap: wrap; gap: .5rem; align-items: center;
+      margin-bottom: 1rem;
+    }
+    .toolbar input {
+      flex: 1; min-width: 10rem;
+      padding: .45rem .65rem;
+      border: 1px solid var(--light);
+      border-radius: 6px;
+      font-size: .82rem;
+      background: var(--card);
+    }
+    .toolbar input:focus { outline: 2px solid var(--accent); outline-offset: 1px; border-color: transparent; }
+
+    .chip {
+      padding: .35rem .65rem;
+      border: 1px solid var(--light);
+      border-radius: 999px;
+      background: var(--card);
+      font-size: .72rem;
+      font-weight: 500;
+      cursor: pointer;
+      color: var(--gray);
+      transition: all .12s;
+    }
+    .chip:hover { border-color: #bbb; color: var(--black); }
+    .chip.on { background: var(--black); color: #fff; border-color: var(--black); }
+    .chip.verdict-under.on { background: var(--under-text); border-color: var(--under-text); }
+    .chip.verdict-mis.on { background: var(--mis-text); border-color: var(--mis-text); }
+
+    /* ── qa banner ── */
+    .qa-banner {
+      background: linear-gradient(135deg, #f8fafc 0%, #fff 100%);
+      border: 1px solid var(--light);
+      border-left: 4px solid #64748b;
+      border-radius: 8px;
+      padding: 1rem 1.15rem;
+      margin-bottom: 1.25rem;
+      font-size: .84rem;
+    }
+    .qa-banner h3 { font-size: .65rem; font-weight: 700; text-transform: uppercase; letter-spacing: .1em; color: var(--muted); margin-bottom: .35rem; }
+    .qa-pills { display: flex; gap: .5rem; margin-top: .5rem; flex-wrap: wrap; }
+    .qa-pill { font-size: .72rem; font-weight: 600; padding: .2rem .55rem; border-radius: 4px; }
+    .qa-pill.pass { background: #dcfce7; color: #15803d; }
+    .qa-pill.warn { background: #fffbeb; color: #b45309; }
+    .qa-pill.fail { background: #fef2f2; color: #b91c1c; }
+
+    /* ── gap list ── */
+    .section-label {
+      font-size: .65rem; font-weight: 700; letter-spacing: .12em;
+      text-transform: uppercase; color: var(--muted);
+      margin-bottom: .65rem;
+    }
+
+    .gap-card {
+      background: var(--card);
+      border: 1px solid var(--light);
+      border-radius: 8px;
+      margin-bottom: 1rem;
+      overflow: hidden;
+      transition: box-shadow .15s;
+    }
+    .gap-card:hover { box-shadow: 0 4px 20px rgba(0,0,0,.06); }
+    .gap-card.hidden { display: none; }
+
+    .gap-card.verdict-UNDER-PRIORITIZED { border-top: 3px solid var(--under-border); }
+    .gap-card.verdict-MISUNDERSTOOD { border-top: 3px solid var(--mis-border); }
+    .gap-card.verdict-IGNORED { border-top: 3px solid var(--ignored-border); }
+
+    .gap-head {
+      padding: 1.1rem 1.25rem .85rem;
+      display: grid;
+      grid-template-columns: 1fr auto;
+      gap: .75rem;
+      align-items: start;
+    }
+    .gap-rank-badge {
+      display: inline-flex; align-items: center; justify-content: center;
+      width: 1.75rem; height: 1.75rem;
+      background: var(--black); color: #fff;
+      font-size: .75rem; font-weight: 700;
+      border-radius: 4px;
+      margin-right: .5rem;
+      vertical-align: middle;
+    }
+    .gap-theme { font-size: 1.05rem; font-weight: 700; line-height: 1.35; }
+    .gap-score-big { font-size: 1.5rem; font-weight: 800; letter-spacing: -.03em; text-align: right; }
+    .gap-score-lbl { font-size: .6rem; text-transform: uppercase; letter-spacing: .08em; color: var(--muted); text-align: right; }
+
+    .gap-tags {
+      grid-column: 1 / -1;
+      display: flex; flex-wrap: wrap; gap: .35rem;
+      margin-top: .15rem;
+    }
+    .tag {
+      font-size: .62rem; font-weight: 600; text-transform: uppercase;
+      letter-spacing: .04em; padding: .15rem .45rem; border-radius: 3px;
+    }
+    .tag-verdict-UNDER-PRIORITIZED { background: var(--under-bg); color: var(--under-text); border: 1px solid var(--under-border); }
+    .tag-verdict-MISUNDERSTOOD { background: var(--mis-bg); color: var(--mis-text); border: 1px solid var(--mis-border); }
+    .tag-verdict-IGNORED { background: var(--ignored-bg); color: var(--ignored-text); border: 1px solid var(--ignored-border); }
+    .tag-muted { background: #f4f4f5; color: var(--gray); border: 1px solid var(--light); }
+
+    .qa-tag.pass { background: #dcfce7; color: #15803d; border: 1px solid #86efac; }
+    .qa-tag.warn { background: #fffbeb; color: #b45309; border: 1px solid #fcd34d; }
+    .qa-tag.fail { background: #fef2f2; color: #b91c1c; border: 1px solid #fca5a5; }
+
+    .gap-body { padding: 0 1.25rem 1.1rem; }
+
+    .need-block {
+      font-size: .9rem;
+      color: #333;
+      padding: .85rem 1rem;
+      background: #fafafa;
+      border-left: 3px solid var(--black);
+      border-radius: 0 6px 6px 0;
+      margin-bottom: 1rem;
+    }
+    .need-lbl { font-size: .6rem; font-weight: 700; text-transform: uppercase; letter-spacing: .1em; color: var(--muted); margin-bottom: .35rem; }
+
+    .merge-box {
+      font-size: .78rem; color: #444;
+      background: #fffbeb; border: 1px solid #fde68a;
+      border-radius: 6px; padding: .65rem .85rem;
+      margin-bottom: 1rem; line-height: 1.5;
+    }
+    .merge-box strong { font-size: .62rem; text-transform: uppercase; letter-spacing: .08em; color: #92400e; }
+
+    .issue-box {
+      display: flex; gap: .75rem; align-items: flex-start;
+      background: #f0f9ff; border: 1px solid #bae6fd;
+      border-radius: 6px; padding: .65rem .85rem;
+      margin-bottom: 1rem; font-size: .78rem;
+    }
+    .issue-box a { color: var(--accent); font-weight: 600; text-decoration: none; }
+    .issue-box a:hover { text-decoration: underline; }
+    .issue-num { font-family: ui-monospace, monospace; font-weight: 700; color: var(--mis-text); white-space: nowrap; }
+
+    /* formula breakdown */
+    .formula-block { margin-bottom: 1rem; }
+    .formula-title { font-size: .62rem; font-weight: 700; text-transform: uppercase; letter-spacing: .1em; color: var(--muted); margin-bottom: .5rem; }
+    .formula-row { display: flex; align-items: center; gap: .5rem; margin-bottom: .35rem; font-size: .72rem; }
+    .formula-row label { width: 5.5rem; flex-shrink: 0; color: var(--gray); }
+    .formula-row label.vol { color: var(--vol); }
+    .formula-row label.tight { color: var(--tight); }
+    .formula-row label.gapc { color: var(--gapc); }
+    .fbar { flex: 1; height: 6px; background: #eee; border-radius: 3px; overflow: hidden; }
+    .fbar-fill { height: 100%; border-radius: 3px; }
+    .fbar-fill.vol { background: var(--vol); }
+    .fbar-fill.tight { background: var(--tight); }
+    .fbar-fill.gapc { background: var(--gapc); }
+    .fval { width: 2.75rem; text-align: right; font-weight: 600; font-variant-numeric: tabular-nums; }
+    .formula-eq {
+      font-family: ui-monospace, monospace;
+      font-size: .68rem; color: #555;
+      background: #f9f9f9; border: 1px solid var(--light);
+      border-radius: 4px; padding: .5rem .65rem;
+      word-break: break-word; line-height: 1.5;
+    }
+
+    /* accordions */
+    .acc { border-top: 1px solid var(--light); }
+    .acc-btn {
+      width: 100%; text-align: left;
+      background: none; border: none;
+      padding: .75rem 1.25rem;
+      font-size: .78rem; font-weight: 600;
+      color: var(--gray);
+      cursor: pointer;
+      display: flex; justify-content: space-between; align-items: center;
+    }
+    .acc-btn:hover { background: #fafafa; color: var(--black); }
+    .acc-btn .chev { transition: transform .15s; font-size: .65rem; }
+    .acc-btn.open .chev { transform: rotate(180deg); }
+    .acc-body { display: none; padding: 0 1.25rem 1rem; font-size: .82rem; }
+    .acc-body.open { display: block; }
+
+    .review {
+      padding: .65rem .75rem; margin-bottom: .4rem;
+      background: #fafafa; border: 1px solid var(--light); border-radius: 6px;
+      font-size: .82rem; line-height: 1.5;
+    }
+    .review-meta { font-family: ui-monospace, monospace; font-size: .65rem; color: var(--muted); margin-bottom: .25rem; }
+
+    .ids { font-family: ui-monospace, monospace; font-size: .68rem; color: #555; line-height: 1.8; word-break: break-all; }
+    .ids a { color: var(--accent); text-decoration: none; }
+    .ids a:hover { text-decoration: underline; }
+
+    .qa-body h4 { font-size: .62rem; font-weight: 700; text-transform: uppercase; letter-spacing: .08em; color: var(--muted); margin: .75rem 0 .3rem; }
+    .qa-body h4:first-child { margin-top: 0; }
+    .qa-body ul { margin-left: 1.1rem; color: #444; }
+    .qa-body p { color: #333; }
+
+    .empty-state {
+      text-align: center; padding: 2.5rem 1rem;
+      color: var(--muted); font-size: .88rem;
+      background: var(--card); border: 1px dashed var(--light); border-radius: 8px;
+    }
+
+    footer {
+      margin-top: 2rem; padding: 1rem 1.15rem;
+      background: var(--card); border: 1px solid var(--light); border-radius: 8px;
+      font-size: .68rem; color: var(--muted); line-height: 1.6;
+    }
+    footer code { font-family: ui-monospace, monospace; font-size: .65rem; }
+
+    .error-box {
+      background: #fff; border: 1px solid #fca5a5; border-radius: 8px;
+      padding: 1.25rem; font-size: .88rem;
+    }
+
+    @media (max-width: 640px) {
+      .stats-grid { grid-template-columns: repeat(2, 1fr); }
+      .gap-head { grid-template-columns: 1fr; }
+      .gap-score-big, .gap-score-lbl { text-align: left; }
+    }
+  </style>
+</head>
+<body>
+
+<nav class="topnav">
+  <div class="topnav-brand">Silent Stakeholder</div>
+  <div class="topnav-links">
+    <a href="index.html" class="active">Results</a>
+    <a href="guide.html">Presentation</a>
+  </div>
+</nav>
+
+<div class="wrap">
+  <div id="app">Loading…</div>
+  <footer id="footer" hidden></footer>
+</div>
+
+<script>
+const REPO = "hrydgard/ppsspp";
+const PIPELINE_STATS = { reviews: 9771, issues: 4004, milestones: 70 };
+
+let allGaps = [];
+let qaByCluster = {};
+let filters = { scope: "headline", verdict: "all", search: "" };
+
+function esc(s) {
+  return String(s ?? "").replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;");
+}
+
+function pct(n) {
+  return (Number(n) * 100).toFixed(1) + "%";
+}
+
+function verdictClass(v) {
+  return "verdict-" + (v || "IGNORED").replace(/\s+/g, "-");
+}
+
+function formulaBreakdown(b) {
+  if (!b || b.volume_score == null) return "";
+  const w = b.weights || { volume: 0.35, tightness: 0.2, gap: 0.45 };
+  const vol = b.volume_score, tight = b.tightness, gap = b.gap_clarity;
+  return `
+    <div class="formula-block">
+      <div class="formula-title">Confidence breakdown (code, not AI)</div>
+      <div class="formula-row">
+        <label class="vol">Volume 35%</label>
+        <div class="fbar"><div class="fbar-fill vol" style="width:${vol * 100}%"></div></div>
+        <span class="fval">${pct(vol)}</span>
+      </div>
+      <div class="formula-row">
+        <label class="tight">Tight 20%</label>
+        <div class="fbar"><div class="fbar-fill tight" style="width:${tight * 100}%"></div></div>
+        <span class="fval">${pct(tight)}</span>
+      </div>
+      <div class="formula-row">
+        <label class="gapc">Gap 45%</label>
+        <div class="fbar"><div class="fbar-fill gapc" style="width:${gap * 100}%"></div></div>
+        <span class="fval">${pct(gap)}</span>
+      </div>
+      ${b.formula ? `<div class="formula-eq">${esc(b.formula)}</div>` : ""}
+    </div>`;
+}
+
+function topIssueBox(gap) {
+  const t = gap.top_issue;
+  if (!t) return "";
+  return `
+    <div class="issue-box">
+      <span class="issue-num">#${t.issue_number}</span>
+      <div>
+        <a href="https://github.com/${REPO}/issues/${t.issue_number}" target="_blank" rel="noopener">${esc(t.title)}</a>
+        <div style="margin-top:.2rem;color:#64748b;font-size:.68rem">
+          ${esc(t.state)} · sim ${(t.similarity || 0).toFixed(2)}${t.milestone ? " · " + esc(t.milestone) : ""}
+        </div>
+      </div>
+    </div>`;
+}
+
+function mergeBox(gap) {
+  if (!gap.merge_reason) return "";
+  const from = (gap.merged_from || []).join(", ");
+  return `
+    <div class="merge-box">
+      <strong>Merged clusters · ${esc(from)}</strong><br>
+      ${esc(gap.merge_reason)}
+    </div>`;
+}
+
+function qaSection(qa) {
+  if (!qa) return "";
+  const complaints = (qa.surface_complaints || []).map(c => `<li>${esc(c)}</li>`).join("");
+  return `
+    <div class="qa-body">
+      <p>${esc(qa.reason)}</p>
+      ${qa.latent_need_check ? `<h4>Hidden need (inferred)</h4><p>${esc(qa.latent_need_check)}</p>` : ""}
+      ${complaints ? `<h4>Surface complaints</h4><ul>${complaints}</ul>` : ""}
+      ${qa.pitch_tip ? `<h4>Pitch tip</h4><p>${esc(qa.pitch_tip)}</p>` : ""}
+    </div>`;
+}
+
+function evidenceSection(gap) {
+  const ids = gap.evidence?.review_ids || [];
+  const issues = gap.evidence?.matched_issue_numbers || [];
+  const samples = gap.sample_reviews || [];
+
+  const reviews = samples.map(r => `
+    <div class="review">
+      <div class="review-meta">${esc(r.id)} · ${"★".repeat(r.stars||0)}${"☆".repeat(5-(r.stars||0))} · ${esc(r.date||"")}</div>
+      ${esc(r.text)}
+    </div>`).join("");
+
+  const idList = ids.slice(0, 16).map(id => esc(id)).join(", ")
+    + (ids.length > 16 ? `, +${ids.length - 16} more` : "");
+
+  let issueList = "—";
+  if (issues.length) {
+    issueList = issues.slice(0, 10).map(n =>
+      `<a href="https://github.com/${REPO}/issues/${n}" target="_blank" rel="noopener">#${n}</a>`
+    ).join(", ");
+    if (issues.length > 10) issueList += `, +${issues.length - 10} more`;
+  }
+
+  return `
+    ${samples.length ? `<p style="font-size:.62rem;font-weight:700;text-transform:uppercase;letter-spacing:.08em;color:#888;margin-bottom:.4rem">Sample reviews</p>${reviews}` : ""}
+    <p style="font-size:.62rem;font-weight:700;text-transform:uppercase;letter-spacing:.08em;color:#888;margin:${samples.length ? ".85rem" : "0"} 0 .4rem">${ids.length} review IDs</p>
+    <div class="ids">${idList}</div>
+    <p style="font-size:.62rem;font-weight:700;text-transform:uppercase;letter-spacing:.08em;color:#888;margin:.85rem 0 .4rem">GitHub issues</p>
+    <div class="ids">${issueList}</div>`;
+}
+
+function renderGapCard(gap, idx) {
+  const vc = verdictClass(gap.verdict);
+  const qa = qaByCluster[gap.cluster_id];
+  const b = gap.confidence_breakdown || {};
+  const merged = gap.merged_from ? `${gap.merged_from.length} clusters merged` : null;
+
+  const qaTag = qa ? `<span class="tag qa-tag ${esc(qa.grade)}">QA ${esc(qa.grade)}</span>` : "";
+
+  return `
+    <article class="gap-card ${vc}" data-rank="${gap.rank}" id="gap-${gap.rank}">
+      <div class="gap-head">
+        <div>
+          <div class="gap-theme">
+            <span class="gap-rank-badge">${gap.rank}</span>
+            ${esc(gap.theme)}
+          </div>
+        </div>
+        <div>
+          <div class="gap-score-big">${esc(gap.confidence_pct)}</div>
+          <div class="gap-score-lbl">confidence</div>
+        </div>
+        <div class="gap-tags">
+          <span class="tag tag-${vc}">${esc(gap.verdict)}</span>
+          <span class="tag tag-muted">${gap.review_count} reviews</span>
+          ${merged ? `<span class="tag tag-muted">${merged}</span>` : ""}
+          ${qaTag}
+        </div>
+      </div>
+      <div class="gap-body">
+        <div class="need-block">
+          <div class="need-lbl">Latent need</div>
+          ${esc(gap.need)}
+        </div>
+        ${mergeBox(gap)}
+        ${topIssueBox(gap)}
+        ${formulaBreakdown(b)}
+      </div>
+      ${qa ? `
+      <div class="acc">
+        <button type="button" class="acc-btn" data-acc="qa-${idx}" aria-expanded="false">
+          QA critic analysis <span class="chev">▼</span>
+        </button>
+        <div class="acc-body" id="acc-qa-${idx}">${qaSection(qa)}</div>
+      </div>` : ""}
+      <div class="acc">
+        <button type="button" class="acc-btn" data-acc="ev-${idx}" aria-expanded="false">
+          Evidence trace · ${(gap.evidence?.review_ids||[]).length} reviews · ${(gap.evidence?.matched_issue_numbers||[]).length} issues <span class="chev">▼</span>
+        </button>
+        <div class="acc-body" id="acc-ev-${idx}">${evidenceSection(gap)}</div>
+      </div>
+    </article>`;
+}
+
+function filteredGaps() {
+  return allGaps.filter(g => {
+    if (filters.scope === "headline" && !g.headline) return false;
+    if (filters.verdict !== "all" && g.verdict !== filters.verdict) return false;
+    if (filters.search) {
+      const q = filters.search.toLowerCase();
+      const hay = [g.theme, g.need, g.verdict, g.cluster_id].join(" ").toLowerCase();
+      if (!hay.includes(q)) return false;
+    }
+    return true;
+  });
+}
+
+function renderGapList() {
+  const list = document.getElementById("gap-list");
+  const gaps = filteredGaps();
+  if (!gaps.length) {
+    list.innerHTML = `<div class="empty-state">No gaps match the current filters.</div>`;
+    return;
+  }
+  list.innerHTML = gaps.map((g, i) => renderGapCard(g, i)).join("");
+  bindAccordions();
+}
+
+function bindAccordions() {
+  document.querySelectorAll(".acc-btn").forEach(btn => {
+    btn.onclick = () => {
+      const id = btn.dataset.acc;
+      const body = document.getElementById("acc-" + id);
+      const open = body.classList.toggle("open");
+      btn.classList.toggle("open", open);
+      btn.setAttribute("aria-expanded", open);
+    };
+  });
+}
+
+function bindToolbar() {
+  document.getElementById("search").oninput = e => {
+    filters.search = e.target.value.trim();
+    renderGapList();
+  };
+  document.querySelectorAll("[data-scope]").forEach(el => {
+    el.onclick = () => {
+      filters.scope = el.dataset.scope;
+      document.querySelectorAll("[data-scope]").forEach(c => c.classList.toggle("on", c.dataset.scope === filters.scope));
+      renderGapList();
+    };
+  });
+  document.querySelectorAll("[data-verdict]").forEach(el => {
+    el.onclick = () => {
+      filters.verdict = el.dataset.verdict;
+      document.querySelectorAll("[data-verdict]").forEach(c => c.classList.toggle("on", c.dataset.verdict === filters.verdict));
+      renderGapList();
+    };
+  });
+}
+
+function renderShell(data, qaData) {
+  const m = data.meta || {};
+  const hs = qaData?.summary;
+
+  return `
+    <header class="hero">
+      <h1>Gap analysis results</h1>
+      <p class="hero-sub">Ranked unmet user needs for PPSSPP — inferred from reviews, validated against the GitHub roadmap. Every gap links to review and issue IDs.</p>
+      <div class="hero-meta">org.ppsspp.ppsspp · github.com/${REPO}</div>
+      <div class="stats-grid">
+        <div class="stat-card"><div class="stat-val">${PIPELINE_STATS.reviews.toLocaleString()}</div><div class="stat-lbl">Reviews ingested</div></div>
+        <div class="stat-card"><div class="stat-val">${PIPELINE_STATS.issues.toLocaleString()}</div><div class="stat-lbl">GitHub issues</div></div>
+        <div class="stat-card"><div class="stat-val">${m.headline_count ?? 5}</div><div class="stat-lbl">Headline gaps</div></div>
+        <div class="stat-card"><div class="stat-val">${m.total_gaps ?? 18}</div><div class="stat-lbl">Total ranked</div></div>
+      </div>
+    </header>
+
+    <div class="pipeline" aria-label="Pipeline stages">
+      <div class="pipe-step done"><strong>Ingest</strong><span>reviews + issues</span></div>
+      <div class="pipe-step done"><strong>Cluster</strong><span>HDBSCAN</span></div>
+      <div class="pipe-step ai"><strong>Label</strong><span>Claude agent</span></div>
+      <div class="pipe-step done"><strong>Match</strong><span>vs roadmap</span></div>
+      <div class="pipe-step done"><strong>Score</strong><span>formula</span></div>
+      <div class="pipe-step out"><strong>Output</strong><span>gaps.json</span></div>
+      <div class="pipe-step ai"><strong>QA</strong><span>optional</span></div>
+    </div>
+
+    ${hs ? `
+    <div class="qa-banner" id="qa-section">
+      <h3>QA critic agent · make qa</h3>
+      Read-only quality gate — tests latent need vs complaint summary. Does not change scores or ranking.
+      <div class="qa-pills">
+        <span class="qa-pill pass">${hs.pass ?? 0} pass</span>
+        <span class="qa-pill warn">${hs.warn ?? 0} warn</span>
+        <span class="qa-pill fail">${hs.fail ?? 0} fail</span>
+      </div>
+    </div>` : ""}
+
+    <div class="toolbar">
+      <input type="search" id="search" placeholder="Search gaps…" autocomplete="off" />
+      <button type="button" class="chip on" data-scope="headline">Top 5</button>
+      <button type="button" class="chip" data-scope="all">All ${m.total_gaps ?? 18}</button>
+      <button type="button" class="chip on" data-verdict="all">All verdicts</button>
+      <button type="button" class="chip verdict-under" data-verdict="UNDER-PRIORITIZED">Under-prioritized</button>
+      <button type="button" class="chip verdict-mis" data-verdict="MISUNDERSTOOD">Misunderstood</button>
+    </div>
+
+    <div class="section-label" id="gap-list-label">Headline gaps · strongest evidence first</div>
+    <div id="gap-list"></div>`;
+}
+
+async function fetchJson(paths) {
+  for (const url of paths) {
+    const r = await fetch(url);
+    if (r.ok) return r.json();
+  }
+  return null;
+}
+
+async function load() {
+  const app = document.getElementById("app");
+  try {
+    const data = await fetchJson(["./gaps.json", "gaps.json"]);
+    if (!data) throw new Error("gaps.json not found — run make run && make viewer");
+
+    const qaData = await fetchJson(["./gaps_qa.json", "gaps_qa.json"]);
+    qaByCluster = {};
+    (qaData?.results || []).forEach(r => { qaByCluster[r.cluster_id] = r; });
+
+    allGaps = (data.all_gaps || data.headline_gaps || []).slice()
+      .sort((a, b) => (a.rank || 99) - (b.rank || 99));
+
+    app.innerHTML = renderShell(data, qaData);
+    bindToolbar();
+    renderGapList();
+
+    const footer = document.getElementById("footer");
+    footer.innerHTML = `
+      Confidence = <code>0.35×volume + 0.20×tightness + 0.45×gap_clarity</code> · defined in <code>src/score.py</code>.
+      Three Claude agents: Label, Match (edge cases), QA critic (optional).
+      Viewer is read-only — no pipeline execution at display time.`;
+    footer.hidden = false;
+
+  } catch (err) {
+    app.innerHTML = `
+      <div class="error-box">
+        <strong>Could not load results</strong><br><br>
+        ${esc(err.message)}<br><br>
+        <code>make run</code> → <code>make qa</code> (optional) → <code>make viewer</code><br>
+        Open <code>http://localhost:8000/viewer/</code>
+      </div>`;
+  }
+}
+
+load();
+</script>
+</body>
+</html>
