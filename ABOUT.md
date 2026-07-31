@@ -44,6 +44,43 @@ The output is a file called `gaps.json`. It contains the top 3 to 5 unmet needs,
 
 ---
 
+## How It Works — The Pipeline
+
+We built a six-stage pipeline. Each stage does one job, produces one output file, and can be inspected independently.
+
+### Stage 1 — Ingest ✅
+Pull 9,771 user reviews from HuggingFace and 4,004 GitHub issues from the PPSSPP repository. Every record gets a stable ID that never changes. IDs are the evidence currency of the entire system — every finding can be traced back to the exact reviews and issues that support it.
+
+### Stage 2 — Cluster ✅
+Convert each review into a mathematical representation of its meaning (an "embedding"), compress the space using UMAP, then use HDBSCAN to find natural groupings. Reviews that circle the same underlying problem land in the same cluster — without anyone telling the algorithm what to look for. Result: **23 clusters** from 2,905 substantive reviews.
+
+### Stage 3 — Label ✅
+For each cluster, send a sample of its reviews to Claude and ask: "What latent need do these users share?" Claude returns a theme name, a one-sentence need description, and a summary of the evidence pattern. This is the **only** place AI is used. The result is cached so re-runs cost nothing.
+
+The 23 clusters produced themes including:
+- *Audio quality issues* — 110 reviews about sound lag and desync
+- *Multi-touch button input* — 38 reviews about inability to press buttons simultaneously
+- *RAR extraction confusion* — 39 reviews about not knowing how to open downloaded game files
+- *PS2 emulator request* — 38 reviews asking for the next generation of emulation
+- *Black screen rendering* — 94 reviews about games that start but show nothing
+
+### Stage 4 — Match (coming next)
+Compare each labeled cluster against GitHub issues using embedding similarity. For each cluster, find the most relevant issues on the roadmap. Assign a verdict based on issue status and labels: is this need **IGNORED**, **UNDER-PRIORITIZED**, or **MISUNDERSTOOD**?
+
+### Stage 5 — Score (coming next)
+Calculate a confidence number for each gap using a transparent formula:
+- How many reviews mention it (volume)
+- How tightly clustered those reviews are (coherence)
+- What star ratings they carry (severity)
+- How recently the reviews were written (recency)
+
+No AI opinion. No black box. The formula is code that anyone can read and challenge.
+
+### Stage 6 — Output (coming next)
+Sort all gaps by confidence score, take the top 3–5, and write `gaps.json`. Every gap comes with the full evidence chain: which reviews, which cluster, which issues, what verdict, what score.
+
+---
+
 ## Why This Approach Is Different
 
 Most tools that analyze app reviews do one of two things:
@@ -61,7 +98,7 @@ Instead we use a method that is **deterministic and auditable at every step**:
 - The AI is only used for one narrow job: reading a cluster of similar reviews and writing a one-sentence label for what they share
 - Every output can be traced back to specific review IDs and issue IDs — nothing is vague
 
-This means every gap we surface can be defended with evidence. Not "the AI said so" — but "here are 200 reviews, here is their cluster, here is the formula score, and here is why the roadmap misses this."
+This means every gap we surface can be defended with evidence. Not "the AI said so" — but "here are 110 reviews, here is their cluster, here is the formula score, and here is why the roadmap misses this."
 
 ---
 
