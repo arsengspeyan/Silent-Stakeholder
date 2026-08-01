@@ -316,7 +316,7 @@ Runs the QA critic on the top 5 headline gaps (or `--all` for every gap). Requir
 
 The final output. Contains:
 - `headline_gaps` — the top 5 distinct unmet needs
-- `all_gaps` — all 19 ranked gaps
+- `all_gaps` — all 18 ranked gaps
 - Full evidence trace per gap: review IDs + matched GitHub issue numbers
 - Confidence breakdown per gap: every input value + the formula string
 - Sample review texts (5 per gap) for quick human verification

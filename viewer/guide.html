@@ -3,22 +3,18 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Presentation — Silent Stakeholder</title>
+  <title>Pitch — Silent Stakeholder</title>
   <style>
     *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
-
     :root {
       --bg: #fafafa; --card: #fff; --border: #e5e5e5; --text: #1a1a1a;
-      --muted: #666; --accent: #1d4ed8; --red: #b91c1c; --amber: #b45309; --blue: #1d4ed8;
+      --muted: #666; --accent: #1d4ed8;
     }
-
     html { scroll-behavior: smooth; scroll-snap-type: y mandatory; }
-
     body {
       font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
       background: var(--bg); color: var(--text); line-height: 1.6;
     }
-
     .topbar {
       position: fixed; top: 0; left: 0; right: 0; z-index: 100;
       background: rgba(255,255,255,.95); border-bottom: 1px solid var(--border);
@@ -40,673 +36,516 @@
       padding: 4.5rem 1.25rem 3rem;
       display: flex; align-items: flex-start; justify-content: center;
     }
-    .slide-inner { max-width: 820px; width: 100%; padding-top: 1rem; }
-
+    .slide-inner { max-width: 820px; width: 100%; padding-top: .5rem; }
     .slide-num {
       font-size: .65rem; font-weight: 700; letter-spacing: .14em;
       text-transform: uppercase; color: var(--muted); margin-bottom: .5rem;
     }
     .slide h1 {
-      font-size: clamp(1.5rem, 4vw, 2rem); font-weight: 800;
-      letter-spacing: -.02em; margin-bottom: .65rem;
+      font-size: clamp(1.45rem, 4vw, 1.95rem); font-weight: 800;
+      letter-spacing: -.02em; margin-bottom: .6rem;
     }
-    .slide h2 { font-size: 1rem; font-weight: 700; margin: 1.1rem 0 .45rem; color: #222; }
-    .slide p { font-size: .9rem; color: #333; margin-bottom: .55rem; }
-    .slide ul, .slide ol { padding-left: 1.25rem; margin: .45rem 0 .65rem; font-size: .88rem; color: #333; }
-    .slide li { margin-bottom: .4rem; }
-    .lead { font-size: 1rem; color: var(--muted); margin-bottom: 1rem; line-height: 1.55; }
+    .slide h2 { font-size: .95rem; font-weight: 700; margin: 1rem 0 .4rem; color: #222; }
+    .slide p { font-size: .88rem; color: #333; margin-bottom: .5rem; }
+    .slide ul, .slide ol { padding-left: 1.2rem; margin: .4rem 0 .6rem; font-size: .86rem; color: #333; }
+    .slide li { margin-bottom: .35rem; }
+    .lead { font-size: .98rem; color: var(--muted); margin-bottom: .85rem; line-height: 1.55; }
 
     .highlight {
-      margin-top: 1.25rem;
-      background: #fffbeb;
-      border: 1px solid #fcd34d;
-      border-left: 4px solid #f59e0b;
-      border-radius: 6px;
-      padding: .9rem 1.1rem;
-      font-size: .88rem;
-      color: #444;
-      line-height: 1.55;
+      margin-top: 1rem; background: #fffbeb; border: 1px solid #fcd34d;
+      border-left: 4px solid #f59e0b; border-radius: 6px;
+      padding: .85rem 1rem; font-size: .86rem; color: #444; line-height: 1.55;
     }
-
     .card {
       background: var(--card); border: 1px solid var(--border);
-      border-radius: 8px; padding: 1.1rem 1.25rem; margin-top: .85rem;
+      border-radius: 8px; padding: 1rem 1.15rem; margin-top: .75rem;
     }
     .card p:last-child { margin-bottom: 0; }
-
-    .diagram {
-      background: var(--card); border: 1px solid var(--border);
-      border-radius: 8px; padding: 1.25rem; margin-top: 1rem; overflow-x: auto;
-    }
-    .diagram svg { display: block; max-width: 100%; height: auto; margin: 0 auto; }
+    .two-col { display: grid; grid-template-columns: 1fr 1fr; gap: .85rem; margin-top: .75rem; }
+    @media (max-width: 600px) { .two-col { grid-template-columns: 1fr; } }
 
     .pipe-row {
       display: flex; flex-wrap: wrap; align-items: center; justify-content: center;
-      gap: .35rem; margin: 1rem 0;
+      gap: .3rem; margin: .85rem 0;
     }
     .pipe-box {
-      background: var(--card); border: 1px solid var(--border); border-radius: 6px;
-      padding: .55rem .75rem; font-size: .78rem; font-weight: 600; text-align: center; min-width: 5rem;
+      border: 1px solid var(--border); border-radius: 6px;
+      padding: .5rem .65rem; font-size: .72rem; font-weight: 600; text-align: center;
     }
     .pipe-box.input { border-color: #93c5fd; background: #eff6ff; }
-    .pipe-box.stage { border-color: #111; }
-    .pipe-box.output { border-color: #86efac; background: #f0fdf4; }
+    .pipe-box.stage { border-color: #111; background: #fff; }
     .pipe-box.ai { border-color: #fcd34d; background: #fffbeb; }
-    .pipe-arrow { color: #999; font-size: 1rem; font-weight: 700; }
+    .pipe-box.out { border-color: #86efac; background: #f0fdf4; }
+    .pipe-arrow { color: #999; font-weight: 700; }
 
-    .two-col { display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; margin-top: .85rem; }
-    @media (max-width: 600px) { .two-col { grid-template-columns: 1fr; } }
+    .steps { counter-reset: step; list-style: none; padding: 0; margin: .75rem 0; }
+    .steps li {
+      counter-increment: step; position: relative;
+      padding: .75rem 1rem .75rem 3rem; margin-bottom: .5rem;
+      background: var(--card); border: 1px solid var(--border); border-radius: 8px;
+      font-size: .86rem;
+    }
+    .steps li::before {
+      content: counter(step); position: absolute; left: .85rem; top: .75rem;
+      width: 1.5rem; height: 1.5rem; background: #111; color: #fff;
+      border-radius: 4px; font-size: .75rem; font-weight: 700;
+      display: flex; align-items: center; justify-content: center;
+    }
+    .steps li strong { display: block; font-size: .82rem; margin-bottom: .15rem; }
 
-    .verdict-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: .65rem; margin-top: .85rem; }
-    @media (max-width: 600px) { .verdict-grid { grid-template-columns: 1fr; } }
-    .verdict-card { border-radius: 6px; padding: .85rem; font-size: .82rem; border: 1px solid var(--border); }
-    .verdict-card h3 { font-size: .72rem; text-transform: uppercase; letter-spacing: .06em; margin-bottom: .35rem; }
-    .verdict-card p { font-size: .82rem; margin: 0; }
-    .v-ignored { background: #fef2f2; border-color: #fca5a5; }
-    .v-ignored h3 { color: var(--red); }
-    .v-under { background: #fffbeb; border-color: #fcd34d; }
-    .v-under h3 { color: var(--amber); }
-    .v-mis { background: #eff6ff; border-color: #93c5fd; }
-    .v-mis h3 { color: var(--blue); }
+    .cmd {
+      font-family: ui-monospace, monospace; font-size: .78rem;
+      background: #111; color: #e5e5e5; border-radius: 6px;
+      padding: .85rem 1rem; margin: .5rem 0; line-height: 1.7;
+    }
+    .cmd .comment { color: #888; }
+
+    .four-grid {
+      display: grid; grid-template-columns: 1fr 1fr; gap: .65rem; margin-top: .75rem;
+    }
+    @media (max-width: 520px) { .four-grid { grid-template-columns: 1fr; } }
+    .four-item {
+      border: 1px solid var(--border); border-radius: 8px; padding: .85rem;
+      background: var(--card);
+    }
+    .four-item h3 { font-size: .72rem; text-transform: uppercase; letter-spacing: .08em; color: var(--accent); margin-bottom: .3rem; }
+    .four-item p { font-size: .82rem; margin: 0; }
 
     .formula-big {
-      font-family: ui-monospace, monospace;
-      font-size: clamp(.78rem, 2.5vw, .92rem);
+      font-family: ui-monospace, monospace; font-size: .88rem;
       background: #f5f5f5; border-left: 4px solid #111;
-      padding: 1rem; margin: .85rem 0; line-height: 1.7;
+      padding: .85rem 1rem; margin: .75rem 0;
     }
+    .results-table { width: 100%; border-collapse: collapse; font-size: .76rem; margin-top: .75rem; }
+    .results-table th, .results-table td { border: 1px solid var(--border); padding: .4rem .5rem; text-align: left; }
+    .results-table th { background: #f5f5f5; font-size: .62rem; text-transform: uppercase; }
 
-    .results-table { width: 100%; border-collapse: collapse; font-size: .78rem; margin-top: .85rem; }
-    .results-table th, .results-table td { border: 1px solid var(--border); padding: .45rem .55rem; text-align: left; }
-    .results-table th { background: #f5f5f5; font-size: .65rem; text-transform: uppercase; letter-spacing: .06em; }
-    .results-table tr:nth-child(even) td { background: #fafafa; }
+    .verdict-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: .55rem; margin-top: .75rem; }
+    @media (max-width: 600px) { .verdict-grid { grid-template-columns: 1fr; } }
+    .verdict-card { border-radius: 6px; padding: .75rem; font-size: .78rem; border: 1px solid var(--border); }
+    .verdict-card h3 { font-size: .68rem; text-transform: uppercase; margin-bottom: .25rem; }
+    .v-ignored { background: #fef2f2; border-color: #fca5a5; }
+    .v-ignored h3 { color: #b91c1c; }
+    .v-under { background: #fffbeb; border-color: #fcd34d; }
+    .v-under h3 { color: #b45309; }
+    .v-mis { background: #eff6ff; border-color: #93c5fd; }
+    .v-mis h3 { color: #1d4ed8; }
 
-    .split-bar {
-      display: flex; height: 28px; border-radius: 4px; overflow: hidden;
-      margin: .75rem 0; font-size: .62rem; font-weight: 700; color: #fff;
+    .mermaid-flow {
+      background: var(--card); border: 1px solid var(--border); border-radius: 8px;
+      padding: .75rem .5rem; overflow-x: auto; text-align: center; margin-top: .75rem;
     }
-    .split-bar span { display: flex; align-items: center; justify-content: center; }
+    .flow-title {
+      font-size: .62rem; font-weight: 700; letter-spacing: .12em;
+      text-transform: uppercase; color: #888; margin-bottom: .4rem;
+    }
 
     .dots {
       position: fixed; right: 1rem; top: 50%; transform: translateY(-50%);
-      display: flex; flex-direction: column; gap: .4rem; z-index: 99;
+      display: flex; flex-direction: column; gap: .35rem; z-index: 99;
     }
-    .dots a { width: 8px; height: 8px; border-radius: 50%; background: #ccc; display: block; }
-    .dots a.active { background: #111; transform: scale(1.3); }
-    .flow-diagram-title {
-      font-size: .65rem; font-weight: 700; letter-spacing: .12em;
-      text-transform: uppercase; color: #888; margin-bottom: .5rem; text-align: center;
-    }
-    .mermaid-flow {
-      background: var(--card); border: 1px solid var(--border); border-radius: 8px;
-      padding: 1rem .5rem; overflow-x: auto; text-align: center;
-    }
-    .mermaid-flow svg { max-width: 100%; height: auto; }
-
-    code { font-family: ui-monospace, monospace; font-size: .85em; background: #f0f0f0; padding: .1rem .3rem; border-radius: 3px; }
+    .dots a { width: 7px; height: 7px; border-radius: 50%; background: #ccc; display: block; }
+    .dots a.active { background: #111; transform: scale(1.25); }
+    code { font-family: ui-monospace, monospace; font-size: .84em; background: #f0f0f0; padding: .08rem .28rem; border-radius: 3px; }
   </style>
 </head>
 <body>
 
-  <div class="topbar">
-    <div>
-      <a href="index.html">← Results</a>
-      <span style="color:#ccc;margin:0 .4rem">|</span>
-      <strong>Presentation</strong>
+<div class="topbar">
+  <div>
+    <a href="index.html">← Results</a>
+    <span style="color:#ccc;margin:0 .4rem">|</span>
+    <strong>Pitch deck</strong>
+  </div>
+  <div class="slide-indicator" id="indicator">1 / 14</div>
+  <div class="nav-btns">
+    <button type="button" id="prev">← Prev</button>
+    <button type="button" id="next">Next →</button>
+  </div>
+</div>
+
+<nav class="dots" id="dots"></nav>
+
+<!-- 1 TITLE -->
+<section class="slide" id="s1">
+  <div class="slide-inner">
+    <div class="slide-num">Slide 1 — Title</div>
+    <h1>Silent Stakeholder</h1>
+    <p class="lead">Find unmet user needs the roadmap is missing — by reconciling app reviews against GitHub issues.</p>
+    <div class="card">
+      <p><strong>Target app:</strong> PPSSPP · <code>org.ppsspp.ppsspp</code></p>
+      <p><strong>GitHub:</strong> <code>hrydgard/ppsspp</code></p>
+      <p><strong>Input:</strong> 9,771 reviews + 4,004 issues + 70 milestones</p>
+      <p><strong>Output:</strong> Top 5 ranked latent needs with evidence IDs and verdicts</p>
     </div>
-    <div class="slide-indicator" id="indicator">1 / 10</div>
-    <div class="nav-btns">
-      <button type="button" id="prev">← Prev</button>
-      <button type="button" id="next">Next →</button>
+    <div class="highlight">
+      Not a complaint summarizer. A traceable pipeline that infers hidden needs and diffs them against the roadmap.
     </div>
   </div>
+</section>
 
-  <nav class="dots" id="dots"></nav>
-
-  <!-- SLIDE 1 -->
-  <section class="slide" id="s1">
-    <div class="slide-inner">
-      <div class="slide-num">Slide 1 — Introduction</div>
-      <h1>Silent Stakeholder</h1>
-      <p class="lead">A pipeline that reads what users say in app store reviews and what the development team plans on GitHub — then finds the gaps between them.</p>
-
-      <p>Every product has users who never get a seat in sprint planning. They leave reviews instead of filing tickets. Those reviews pile up — thousands of them — while the team tracks work in GitHub issues and milestones. Nobody systematically connects the two.</p>
-      <p>Silent Stakeholder is that bridge. The analysis targets <strong>PPSSPP</strong>, an open-source PlayStation Portable emulator, chosen for its large review corpus and a real public GitHub roadmap on the same product.</p>
-
+<!-- 2 PROBLEM -->
+<section class="slide" id="s2">
+  <div class="slide-inner">
+    <div class="slide-num">Slide 2 — Problem</div>
+    <h1>Users and teams never sync</h1>
+    <p>Developers plan in GitHub. Users speak in app store reviews. Thousands of reviews pile up while milestones track a different conversation.</p>
+    <div class="two-col">
       <div class="card">
-        <p><strong>App:</strong> PPSSPP · package <code>org.ppsspp.ppsspp</code></p>
-        <p><strong>GitHub repo:</strong> <code>hrydgard/ppsspp</code></p>
-        <p><strong>User data:</strong> 9,771 reviews from HuggingFace <code>sealuzh/app_reviews</code></p>
-        <p><strong>Roadmap data:</strong> 4,004 GitHub issues + 70 milestones</p>
-        <p><strong>Output:</strong> Top 5 latent unmet needs — each with a confidence score, review IDs as evidence, GitHub issue IDs, and a verdict</p>
-      </div>
-
-      <h2>What makes this different from a summarizer</h2>
-      <p>A summarizer tells you "users complain about lag." This system finds <em>latent needs</em> — patterns across hundreds of reviews where users circle the same underlying problem using completely different words, but never state the need directly.</p>
-
-      <div class="highlight">
-        A system — not a summarizer. It finds patterns users never stated directly, and every gap links to specific review IDs and GitHub issue IDs that are fully traceable.
-      </div>
-    </div>
-  </section>
-
-  <!-- SLIDE 2 -->
-  <section class="slide" id="s2">
-    <div class="slide-inner">
-      <div class="slide-num">Slide 2 — The problem</div>
-      <h1>Two groups. One product. Never in sync.</h1>
-
-      <p>Developers plan features in GitHub. Users express frustration in app store reviews. These two channels almost never talk to each other. The result: teams ship things users don't urgently need, while real pain points stay unbuilt — sometimes for years.</p>
-      <p>Users are the <strong>silent stakeholders</strong> — affected by every product decision but with no structured voice in planning. Reviews are the closest thing to that voice at scale, but they are messy, repetitive, and hard to act on without processing.</p>
-
-      <div class="diagram">
-        <svg viewBox="0 0 520 160" width="520" aria-hidden="true">
-          <rect x="20" y="40" width="180" height="80" rx="6" fill="#eff6ff" stroke="#93c5fd"/>
-          <text x="110" y="72" text-anchor="middle" font-size="13" font-weight="700">Users</text>
-          <text x="110" y="92" text-anchor="middle" font-size="11" fill="#666">9,771 app reviews</text>
-          <text x="110" y="108" text-anchor="middle" font-size="11" fill="#666">noisy, honest, ignored</text>
-          <rect x="320" y="40" width="180" height="80" rx="6" fill="#f0fdf4" stroke="#86efac"/>
-          <text x="410" y="72" text-anchor="middle" font-size="13" font-weight="700">Team</text>
-          <text x="410" y="92" text-anchor="middle" font-size="11" fill="#666">4,004 GitHub issues</text>
-          <text x="410" y="108" text-anchor="middle" font-size="11" fill="#666">planned features &amp; bugs</text>
-          <path d="M200 80 L320 80" stroke="#111" stroke-width="2" marker-end="url(#arr)"/>
-          <text x="260" y="68" text-anchor="middle" font-size="10" fill="#b91c1c" font-weight="700">GAP?</text>
-          <defs><marker id="arr" markerWidth="8" markerHeight="8" refX="6" refY="3" orient="auto"><path d="M0,0 L0,6 L8,3 z" fill="#111"/></marker></defs>
-        </svg>
-      </div>
-
-      <h2>What this is NOT</h2>
-      <ul>
-        <li>Not listing the most frequent complaint words</li>
-        <li>Not asking AI to guess the top user needs from scratch</li>
-        <li>Not producing scores the LLM made up</li>
-      </ul>
-
-      <div class="highlight">
-        Complaints are easy — anyone can count the word "lag." Latent needs are different: what users needed but never said in one sentence, proven by clustering math across hundreds of reviews.
-      </div>
-    </div>
-  </section>
-
-  <!-- SLIDE 3 -->
-  <section class="slide" id="s3">
-    <div class="slide-inner">
-      <div class="slide-num">Slide 3 — Data sources</div>
-      <h1>Same product. Both sides. Traceable IDs.</h1>
-
-      <p>The pipeline connects one app’s user signals with its public roadmap. The ingest stage pulls both sides and assigns every record a stable ID that never changes between runs. IDs are the evidence currency — each gap points to specific reviews like <code>rev_0142</code> or issues like <code>#15281</code>.</p>
-
-      <div class="two-col">
-        <div class="card">
-          <h2 style="margin-top:0;color:#1d4ed8">User signals — reviews</h2>
-          <ul>
-            <li>Source: HuggingFace <code>sealuzh/app_reviews</code> (288k reviews across all apps)</li>
-            <li>Filtered to PPSSPP only → <strong>9,771 reviews</strong></li>
-            <li>Sorted by date + text before ID assignment → deterministic</li>
-            <li>Each review: <code>rev_0001</code>, text, star rating, date</li>
-            <li>Cached in <code>data/reviews.json</code></li>
-          </ul>
-        </div>
-        <div class="card">
-          <h2 style="margin-top:0;color:#15803d">Team roadmap — GitHub</h2>
-          <ul>
-            <li>Source: GitHub API on <code>hrydgard/ppsspp</code></li>
-            <li>9,900 raw records → <strong>4,004 real issues</strong> (PRs removed)</li>
-            <li>70 milestones (open + closed) for priority context</li>
-            <li>Issue ID = GitHub issue number (permanent)</li>
-            <li>Cached in <code>data/issues.json</code>, <code>data/milestones.json</code></li>
-          </ul>
-        </div>
-      </div>
-
-      <h2>Why PPSSPP specifically</h2>
-      <p>Large review set for an open-source app, active GitHub with real milestones, and genuine tension between what passionate users want (compatibility, performance) and what a small team can deliver. Wikipedia Android was considered first — but its issues live on Phabricator, not GitHub.</p>
-
-      <div class="highlight">
-        Every record has a stable ID. Each gap links to the exact review and the exact GitHub issue — nothing is vague or hand-waved.
-      </div>
-    </div>
-  </section>
-
-  <!-- SLIDE 4: End-to-end flow -->
-  <section class="slide" id="s4">
-    <div class="slide-inner">
-      <div class="slide-num">Slide 4 — End-to-end flow</div>
-      <h1>From raw data to ranked gaps</h1>
-
-      <p>Two external sources feed one pipeline. Five stages transform them into a ranked list of unmet needs. The web viewer reads the final file — no processing at display time.</p>
-
-      <div class="diagram mermaid-flow">
-        <p class="flow-diagram-title">End-to-end flow</p>
-        <pre class="mermaid">
-%%{init: {'theme': 'base', 'themeVariables': {'lineColor': '#2563eb', 'primaryColor': '#dbeafe', 'primaryBorderColor': '#2563eb', 'primaryTextColor': '#1e3a5f', 'secondaryColor': '#fef3c7', 'tertiaryColor': '#f0fdf4'}}}%%
-flowchart TB
-    subgraph Sources["Data sources"]
-        HF["HuggingFace<br/>sealuzh/app_reviews"]
-        GH["GitHub API<br/>hrydgard/ppsspp"]
-    end
-
-    subgraph Stage1["Stage 1 — Ingest (ingest.py)"]
-        direction TB
-        S1A["Filter to PPSSPP reviews"]
-        S1B["Sort → assign stable IDs<br/>rev_0001, rev_0002, …"]
-        S1C["Fetch issues (drop PRs)"]
-        S1D["Fetch milestones"]
-    end
-
-    subgraph Cache1["Cached outputs"]
-        R["data/reviews.json<br/>~9,771 reviews"]
-        I["data/issues.json<br/>~4,004 issues"]
-        M["data/milestones.json<br/>~70 milestones"]
-    end
-
-    subgraph Stage2["Stage 2 — Cluster (cluster.py)"]
-        direction TB
-        S2A["Embed text locally<br/>sentence-transformers<br/>(384-dim vectors)"]
-        S2B["Filter reviews &lt; 50 chars<br/>drop 'Good', 'Nice', etc."]
-        S2C["UMAP reduce<br/>384 → 10 dimensions"]
-        S2D["HDBSCAN cluster<br/>density-based grouping"]
-        S2E["Compute tightness<br/>per cluster"]
-    end
-
-    subgraph Cache2["Cached outputs"]
-        E["data/embeddings.npy<br/>(9771 × 384)"]
-        C["data/clusters.json<br/>cluster_id, review_ids,<br/>size, tightness"]
-    end
-
-    subgraph Stages35["Stages 3–5 (label · match · score)"]
-        direction LR
-        L["Label<br/>LLM names each cluster"]
-        Ma["Match<br/>theme ↔ GitHub issues"]
-        Sc["Score<br/>confidence formula"]
-        Out["gaps.json<br/>top 3–5 unmet needs"]
-    end
-
-    Viewer["Results viewer<br/>make viewer"]
-
-    QA["QA critic agent<br/>make qa · optional"]
-    QOut["gaps_qa.json<br/>pass / warn / fail"]
-
-    HF --> S1A --> S1B --> R
-    GH --> S1C --> I
-    GH --> S1D --> M
-
-    R --> S2A --> E
-    S2A --> S2B --> S2C --> S2D --> S2E --> C
-
-    C --> L --> Ma
-    I --> Ma
-    M --> Ma
-    Ma --> Sc --> Out --> Viewer
-    Out -.-> QA -.-> QOut
-
-    style Stage1 fill:#dbeafe,stroke:#2563eb,stroke-width:2px
-    style Stage2 fill:#dbeafe,stroke:#2563eb,stroke-width:2px
-    style Stages35 fill:#dbeafe,stroke:#2563eb,stroke-width:2px
-    style Out fill:#bbf7d0,stroke:#16a34a,stroke-width:3px
-    style Viewer fill:#bbf7d0,stroke:#16a34a,stroke-width:3px
-    style QA fill:#f5f3ff,stroke:#7c3aed,stroke-width:2px,stroke-dasharray:5 5
-    style QOut fill:#f5f3ff,stroke:#7c3aed,stroke-width:2px
-    style Sources fill:#fef3c7,stroke:#f59e0b,stroke-width:2px
-    style Cache1 fill:#f0fdf4,stroke:#16a34a,stroke-width:2px
-    style Cache2 fill:#f0fdf4,stroke:#16a34a,stroke-width:2px
-
-    linkStyle default stroke:#2563eb,stroke-width:3px
-        </pre>
-      </div>
-
-      <div class="highlight">
-        <code>make run</code> executes the full chain and writes <code>gaps.json</code>. Optional: <code>make qa</code> runs the QA critic agent (does not change scores). <code>make viewer</code> serves the Results page — the pipeline does not run again at demo time.
-      </div>
-    </div>
-  </section>
-
-  <!-- SLIDE 5 -->
-  <section class="slide" id="s5">
-    <div class="slide-inner">
-      <div class="slide-num">Slide 5 — Pipeline overview</div>
-      <h1>Five stages. One ranked output.</h1>
-
-      <p>The pipeline is a chain of five independent Python scripts orchestrated by <code>src/pipeline.py</code>. Run everything with <code>make run</code>. Each stage caches its output — re-runs skip work already done.</p>
-
-      <div class="pipe-row">
-        <div class="pipe-box input">Reviews</div><span class="pipe-arrow">+</span>
-        <div class="pipe-box input">Issues</div><span class="pipe-arrow">→</span>
-        <div class="pipe-box stage">Ingest</div><span class="pipe-arrow">→</span>
-        <div class="pipe-box stage">Cluster</div><span class="pipe-arrow">→</span>
-        <div class="pipe-box ai">Label</div><span class="pipe-arrow">→</span>
-        <div class="pipe-box stage">Match</div><span class="pipe-arrow">→</span>
-        <div class="pipe-box stage">Score</div><span class="pipe-arrow">→</span>
-        <div class="pipe-box output">gaps.json</div>
-      </div>
-
-      <div class="diagram">
-        <svg viewBox="0 0 600 200" width="600" aria-hidden="true">
-          <text x="300" y="22" text-anchor="middle" font-size="11" fill="#666" font-weight="600">WHO DECIDES WHAT</text>
-          <rect x="30" y="40" width="250" height="140" rx="6" fill="#f5f5f5" stroke="#ccc"/>
-          <text x="155" y="62" text-anchor="middle" font-size="12" font-weight="700">Algorithm (code)</text>
-          <text x="155" y="82" text-anchor="middle" font-size="10" fill="#444">• which reviews group together</text>
-          <text x="155" y="98" text-anchor="middle" font-size="10" fill="#444">• confidence formula &amp; ranking</text>
-          <text x="155" y="114" text-anchor="middle" font-size="10" fill="#444">• most verdict rules</text>
-          <text x="155" y="130" text-anchor="middle" font-size="10" fill="#444">• merge &amp; exclude clusters</text>
-          <rect x="320" y="40" width="250" height="140" rx="6" fill="#fffbeb" stroke="#fcd34d"/>
-          <text x="445" y="62" text-anchor="middle" font-size="12" font-weight="700">AI helper only</text>
-          <text x="445" y="82" text-anchor="middle" font-size="10" fill="#444">• name each cluster in plain English</text>
-          <text x="445" y="98" text-anchor="middle" font-size="10" fill="#444">• resolve ambiguous verdicts only</text>
-          <text x="445" y="120" text-anchor="middle" font-size="10" fill="#b45309" font-weight="600">Never picks score, rank, or grouping</text>
-        </svg>
-      </div>
-
-      <h2>Why the LLM is not the brain</h2>
-      <p>Every gap in the output must be <strong>traceable and reproducible</strong>. If an LLM decides grouping, scores, or rankings, the result becomes an opinion that changes between runs and cannot be explained with a fixed rule. Silent Stakeholder is built so that a confidence score like 81.3% always comes from the same formula applied to the same data — not from a model’s intuition.</p>
-
-      <div class="two-col">
-        <div class="card">
-          <h2 style="margin-top:0">What code handles (no LLM)</h2>
-          <ul>
-            <li><strong>Ingest</strong> — download and assign IDs. Pure data work.</li>
-            <li><strong>Cluster</strong> — local embeddings + HDBSCAN. Same input always gives the same groups.</li>
-            <li><strong>Match</strong> — cosine similarity against 4,004 issues. Verdict rules from issue state and milestones.</li>
-            <li><strong>Score</strong> — explicit formula. Ranking is a sort by that number.</li>
-          </ul>
-        </div>
-        <div class="card">
-          <h2 style="margin-top:0">Three Anthropic Claude agents</h2>
-          <p>All use the same API key (<code>ANTHROPIC_API_KEY</code>) and model (<code>claude-sonnet-4-6</code>). Each has a different job.</p>
-          <ul>
-            <li><strong>Label agent</strong> (<code>label.py</code>) — turns ~20 sample reviews into one plain-language need sentence. Naming only; cluster membership stays fixed.</li>
-            <li><strong>Match agent</strong> (<code>match.py</code>) — when an active GitHub issue exists and similarity is high, decides MISUNDERSTOOD vs addressed. Rules handle everything else.</li>
-            <li><strong>QA critic agent</strong> (<code>qa_gaps.py</code>) — after the pipeline, grades each gap: latent need or complaint summary? <strong>Does not change scores or ranking.</strong> Run with <code>make qa</code>.</li>
-          </ul>
-        </div>
-      </div>
-
-      <h2>Why not use the LLM for clustering?</h2>
-      <ul>
-        <li><strong>Cost &amp; speed</strong> — embedding 9,771 reviews locally takes ~1–2 minutes and costs nothing. An LLM call per review would be slow and expensive.</li>
-        <li><strong>Reproducibility</strong> — the same reviews always produce the same vectors and the same clusters. An LLM might group differently each run.</li>
-        <li><strong>Evidence integrity</strong> — cluster membership is ground truth for the whole pipeline. The LLM must not move reviews between groups to "fit a narrative."</li>
-        <li><strong>Scale</strong> — similarity math handles thousands of reviews at once. LLMs have context limits and cannot reliably compare 9,771 texts to each other in one pass.</li>
-      </ul>
-
-      <h2>Why not use the LLM for confidence scores?</h2>
-      <p>A score like 81.3% vs 57.3% must mean something consistent and explainable. A formula with published weights (35% volume, 20% tightness, 45% gap clarity) lets anyone recalculate the number from the raw inputs. An LLM saying "87% confident" would not be comparable across gaps — and the difference between 90% and 55% would have no fixed meaning.</p>
-
-      <h2>How to demo</h2>
-      <ul>
-        <li><code>make run</code> — runs all 5 stages, produces <code>gaps.json</code></li>
-        <li><code>make qa</code> — QA critic agent checks top gaps (pass / warn / fail)</li>
-        <li><code>make viewer</code> — copies results and starts a local web server</li>
-        <li>Open <code>http://localhost:8000/viewer/</code> — no AI runs here, just displays the output</li>
-      </ul>
-
-      <div class="highlight">
-        Math finds patterns. Three Claude agents assist: Label names needs, Match resolves ambiguous verdicts, QA critic validates output. Scores and rank always come from code and a published formula in <code>score.py</code>.
-      </div>
-    </div>
-  </section>
-
-  <!-- SLIDE 6 -->
-  <section class="slide" id="s6">
-    <div class="slide-inner">
-      <div class="slide-num">Slide 6 — Stages 1 &amp; 2</div>
-      <h1>Ingest + Cluster — finding patterns in noise</h1>
-
-      <div class="two-col">
-        <div class="card">
-          <h2 style="margin-top:0">Stage 1 · Ingest</h2>
-          <p>Downloads both data sources and normalizes them into JSON files with stable IDs. Uses cache on re-run — only re-fetches with <code>--refresh</code>.</p>
-          <ul>
-            <li>Reviews from HuggingFace, filtered to PPSSPP</li>
-            <li>GitHub issues via API (PRs excluded)</li>
-            <li>GitHub milestones for roadmap context</li>
-            <li>Code: <code>src/ingest.py</code></li>
-          </ul>
-        </div>
-        <div class="card">
-          <h2 style="margin-top:0">Stage 2 · Cluster</h2>
-          <p>Groups reviews that talk about similar things — using local math, no API calls. This is where latent patterns are discovered.</p>
-          <ul>
-            <li>Embed each review with sentence-transformers (CPU)</li>
-            <li>Drop reviews under 50 chars ("Good", "Nice")</li>
-            <li>UMAP: compress 384 dimensions → 10</li>
-            <li>HDBSCAN: find dense groups automatically</li>
-            <li>Result: 23 clusters + noise</li>
-            <li>Code: <code>src/cluster.py</code></li>
-          </ul>
-        </div>
-      </div>
-
-      <div class="diagram">
-        <svg viewBox="0 0 560 100" width="560" aria-hidden="true">
-          <text x="80" y="30" font-size="10" fill="#666">"GTA lags on my phone"</text>
-          <text x="80" y="48" font-size="10" fill="#666">"God of War keeps crashing"</text>
-          <text x="80" y="66" font-size="10" fill="#666">"too slow after update"</text>
-          <path d="M200 48 L260 48" stroke="#111" stroke-width="2" marker-end="url(#arr2)"/>
-          <rect x="270" y="20" width="120" height="56" rx="6" fill="#f0fdf4" stroke="#86efac"/>
-          <text x="330" y="44" text-anchor="middle" font-size="11" font-weight="700">Cluster c_09</text>
-          <text x="330" y="62" text-anchor="middle" font-size="10" fill="#666">232 reviews</text>
-          <path d="M390 48 L450 48" stroke="#111" stroke-width="2" marker-end="url(#arr2)"/>
-          <text x="480" y="44" font-size="10" font-weight="700">Same latent need</text>
-          <text x="480" y="60" font-size="9" fill="#666">different surface words</text>
-          <defs><marker id="arr2" markerWidth="8" markerHeight="8" refX="6" refY="3" orient="auto"><path d="M0,0 L0,6 L8,3 z" fill="#111"/></marker></defs>
-        </svg>
-      </div>
-
-      <h2>Why HDBSCAN, not k-means</h2>
-      <p>The pipeline does not require guessing how many needs exist upfront. HDBSCAN finds the count automatically and marks reviews that don't fit any group as noise instead of forcing them into the wrong cluster. That keeps the evidence clean.</p>
-
-      <div class="highlight">
-        Cluster membership is ground truth. The algorithm decides which reviews belong together. The AI only names the group afterward — it never moves reviews between clusters.
-      </div>
-    </div>
-  </section>
-
-  <!-- SLIDE 7 -->
-  <section class="slide" id="s7">
-    <div class="slide-inner">
-      <div class="slide-num">Slide 7 — Stages 3, 4 &amp; 5</div>
-      <h1>Label + Match + Score — from groups to ranked gaps</h1>
-
-      <div class="card">
-        <h2 style="margin-top:0">Stage 3 · Label (<code>src/label.py</code>)</h2>
-        <p>Claude reads up to 20 sample reviews from each cluster (longest first — more context) and returns JSON with three fields: <code>need</code> (one sentence, user's perspective), <code>theme</code> (2–4 word label), <code>summary</code> (evidence pattern). Every API call cached to <code>data/label_cache/</code> — re-runs are free.</p>
-      </div>
-
-      <div class="card">
-        <h2 style="margin-top:0">Stage 4 · Match (<code>src/match.py</code>)</h2>
-        <p>Embeds each labeled need and all 4,004 issue titles+bodies. Finds top-5 most similar issues via cosine similarity. Then applies rule-based verdicts:</p>
+        <h2 style="margin-top:0">Users (silent stakeholders)</h2>
         <ul>
-          <li>Best similarity below 0.35 → <strong>IGNORED</strong> (roadmap has nothing)</li>
-          <li>Related issue shipped in closed milestone but users still complain → <strong>MISUNDERSTOOD</strong></li>
-          <li>Related issues exist but none actively worked on → <strong>UNDER-PRIORITIZED</strong></li>
-          <li>Active open issue exists → LLM decides MISUNDERSTOOD vs addressed (cached)</li>
+          <li>9,771 PPSSPP reviews</li>
+          <li>Honest, messy, unfiltered</li>
+          <li>No seat in sprint planning</li>
         </ul>
       </div>
-
       <div class="card">
-        <h2 style="margin-top:0">Stage 5 · Score (<code>src/score.py</code>)</h2>
-        <p>Runs the confidence formula on every gap candidate. Merges clusters that represent the same underlying need (documented in code with reasons). Ranks all gaps, picks top 5 as headline findings. Writes <code>gaps.json</code> with full evidence traces and formula breakdown per gap.</p>
-      </div>
-
-      <div class="card">
-        <h2 style="margin-top:0">QA · Quality tester (<code>src/qa_gaps.py</code>) — optional</h2>
-        <p>The <strong>QA critic agent</strong> (Anthropic Claude) runs after the pipeline via <code>make qa</code>. It grades each headline gap <strong>pass / warn / fail</strong>: latent need vs complaint summary? Do sample reviews support the need? Writes <code>data/gaps_qa.json</code> with pitch tips. <strong>Does not change scores, ranking, or gaps.json.</strong> Grades appear on the Results page when QA was run before <code>make viewer</code>.</p>
-      </div>
-
-      <div class="highlight">
-        Three Claude agents in production/testing: Label names needs, Match resolves ambiguous verdicts, QA critic validates output. Every call cached. Ranking and confidence always come from the formula in <code>score.py</code>.
-      </div>
-    </div>
-  </section>
-
-  <!-- SLIDE 8 -->
-  <section class="slide" id="s8">
-    <div class="slide-inner">
-      <div class="slide-num">Slide 8 — Confidence formula</div>
-      <h1>Every percentage comes from code — not AI opinion</h1>
-
-      <p>Each gap gets a confidence score from an explicit formula with three inputs. Weights are constants at the top of <code>score.py</code> — change them and re-run in seconds. The full calculation string is stored in every gap record and shown on the Results page.</p>
-
-      <div class="formula-big">
-        confidence = (0.35 × volume) + (0.20 × tightness) + (0.45 × gap_clarity)
-      </div>
-
-      <div class="split-bar">
-        <span style="width:45%;background:#a21caf">Gap clarity 45%</span>
-        <span style="width:35%;background:#15803d">Volume 35%</span>
-        <span style="width:20%;background:#6d28d9">Tightness 20%</span>
-      </div>
-
-      <div class="two-col">
-        <div class="card">
-          <h2 style="margin-top:0">Volume (35%)</h2>
-          <p>How many reviews support this need? Log-scaled so 500 reviews doesn't get 10× the weight of 50 — diminishing returns for very large clusters.</p>
-        </div>
-        <div class="card">
-          <h2 style="margin-top:0">Tightness (20%)</h2>
-          <p>Mean cosine similarity within the cluster. High = reviews say similar things. Low = varied wording (still valid, but weaker evidence).</p>
-        </div>
-      </div>
-      <div class="card">
-        <h2 style="margin-top:0">Gap clarity (45%) — the most important signal</h2>
-        <p>How clearly does the roadmap miss this need? IGNORED = 1.0 · UNDER-PRIORITIZED = 0.8 · MISUNDERSTOOD = 0.6. Gets the highest weight because a loud complaint the team is already fixing is less urgent than one they've ignored entirely.</p>
-      </div>
-
-      <div class="card">
-        <h2 style="margin-top:0">Gap #1 worked example — 81.3%</h2>
-        <p style="font-family:monospace;font-size:.82rem">(0.35 × 0.9991) + (0.20 × 0.5189) + (0.45 × 0.80) = 0.8135 → 81.3%</p>
-        <p style="margin-top:.5rem;font-size:.85rem">513 reviews (merged from 3 clusters) · tightness 0.52 · UNDER-PRIORITIZED · GitHub issues exist but not actively prioritized</p>
-      </div>
-
-      <div class="highlight">
-        Every confidence score is produced by the same formula in <code>score.py</code>. The breakdown is stored in <code>gaps.json</code> and shown on the Results page — 81.3% is arithmetic on volume, tightness, and gap clarity, not a guess.
-      </div>
-    </div>
-  </section>
-
-  <!-- SLIDE 9 -->
-  <section class="slide" id="s9">
-    <div class="slide-inner">
-      <div class="slide-num">Slide 9 — Verdicts</div>
-      <h1>Three verdicts — what the roadmap is doing wrong</h1>
-
-      <p>Every gap gets exactly one verdict comparing the user need against the closest GitHub issues. Verdicts are assigned by rules in <code>match.py</code>, using issue state, milestone status, staleness, and similarity score.</p>
-
-      <div class="verdict-grid">
-        <div class="verdict-card v-ignored">
-          <h3>Ignored</h3>
-          <p>No GitHub issue is similar enough (similarity &lt; 0.35). The team may not know this need exists at all.</p>
-        </div>
-        <div class="verdict-card v-under">
-          <h3>Under-prioritized</h3>
-          <p>Related issues exist but are closed, stale (not updated in 2+ years), or not assigned to an open milestone. Acknowledged but not being worked on.</p>
-        </div>
-        <div class="verdict-card v-mis">
-          <h3>Misunderstood</h3>
-          <p>The team is working on something related — but from the wrong angle. Or they shipped a fix and users still report the same problem.</p>
-        </div>
-      </div>
-
-      <div class="card" style="margin-top:1rem">
-        <h2 style="margin-top:0">Real example — Black screen rendering (rank #10, 63.9%, MISUNDERSTOOD)</h2>
-        <p>Issue #15469 "Black screen on Raspberry Pi 3B" was closed and shipped in milestone v1.14.0. The team considers it fixed. But Android users are still reporting black screens in reviews. The team fixed a Pi-specific edge case — not the general rendering failure users experience on their phones.</p>
-        <p style="margin-top:.5rem">This is the clearest MISUNDERSTOOD case: the roadmap thinks the problem is solved. Users disagree.</p>
-      </div>
-
-      <div class="highlight">
-        MISUNDERSTOOD is often the most valuable finding — it reveals where the team and users are talking past each other, even when both sides are actively engaged.
-      </div>
-    </div>
-  </section>
-
-  <!-- SLIDE 10 -->
-  <section class="slide" id="s10">
-    <div class="slide-inner">
-      <div class="slide-num">Slide 10 — Results</div>
-      <h1>Top 5 unmet needs — PPSSPP</h1>
-
-      <p>Ranked by confidence formula. Strongest evidence first. Each row links to hundreds of review IDs and matched GitHub issues in the full output.</p>
-
-      <table class="results-table">
-        <thead>
-          <tr><th>#</th><th>Theme</th><th>Conf</th><th>Reviews</th><th>Verdict</th></tr>
-        </thead>
-        <tbody>
-          <tr><td>1</td><td>Games run poorly (performance &amp; compatibility)</td><td>81.3%</td><td>513</td><td>UNDER-PRIORITIZED</td></tr>
-          <tr><td>2</td><td>Game acquisition guidance</td><td>80.5%</td><td>516</td><td>UNDER-PRIORITIZED</td></tr>
-          <tr><td>3</td><td>Game compatibility reliability</td><td>73.4%</td><td>170</td><td>MISUNDERSTOOD</td></tr>
-          <tr><td>4</td><td>Device compatibility issues</td><td>73.3%</td><td>70</td><td>UNDER-PRIORITIZED</td></tr>
-          <tr><td>5</td><td>Emulation speed performance</td><td>71.3%</td><td>54</td><td>UNDER-PRIORITIZED</td></tr>
-        </tbody>
-      </table>
-
-      <h2>Gap #1 in more detail</h2>
-      <p>Three separate clusters merged (c_09, c_20, c_22) because they describe the same root need from different angles: game compatibility breaking unpredictably, general emulator slowness, and frame-rate lag. Combined: 513 reviews — the largest evidence pool in the dataset.</p>
-      <p>Matched GitHub issues (#14349, #15281, #14074) acknowledge performance problems but are closed with no active milestone. The team knows — but isn't prioritizing it now.</p>
-
-      <h2>18 total gaps ranked</h2>
-      <p>The top 5 are headline findings. The full ranked list of 18 gaps is in <code>gaps.json</code> and visible on the Results page under "All gaps."</p>
-
-      <div class="highlight">
-        Gap #1 has 513 reviews merged from 3 clusters, 81.3% confidence, and a clear UNDER-PRIORITIZED verdict — the roadmap acknowledges the problem but is not actively working on it.
-      </div>
-    </div>
-  </section>
-
-  <!-- SLIDE 11 -->
-  <section class="slide" id="s11">
-    <div class="slide-inner">
-      <div class="slide-num">Slide 11 — Summary &amp; demo</div>
-      <h1>What Silent Stakeholder delivers</h1>
-
-      <div class="card">
-        <h2 style="margin-top:0">Commands</h2>
+        <h2 style="margin-top:0">Team (roadmap)</h2>
         <ul>
-          <li><code>make run</code> — build <code>gaps.json</code></li>
-          <li><code>make qa</code> — QA critic grades headline gaps</li>
-          <li><code>make viewer</code> — Results + presentation in browser</li>
+          <li>4,004 GitHub issues</li>
+          <li>70 milestones</li>
+          <li>Planned work — may miss real user needs</li>
         </ul>
       </div>
+    </div>
+    <div class="highlight">
+      The gap between what users need and what the team builds is invisible without a system to connect both sides.
+    </div>
+  </div>
+</section>
 
-      <div class="card">
-        <h2 style="margin-top:0">The output</h2>
-        <p>A ranked list of unmet user needs — each with a plain-language description, a formula-based confidence score, hundreds of review IDs as evidence, matched GitHub issue IDs, and a verdict showing how the roadmap relates to that need.</p>
+<!-- 3 WHAT WE BUILD -->
+<section class="slide" id="s3">
+  <div class="slide-inner">
+    <div class="slide-num">Slide 3 — What we build</div>
+    <h1>Every gap has four things</h1>
+    <p>Not “513 users said lag.” Each ranked gap is a structured record judges can audit.</p>
+    <div class="four-grid">
+      <div class="four-item">
+        <h3>1 · The need</h3>
+        <p>Latent user need in plain language — inferred from patterns, not keyword counts.</p>
       </div>
+      <div class="four-item">
+        <h3>2 · Confidence</h3>
+        <p>Calibrated score from a fixed formula — 81.3% and 57.3% mean different things.</p>
+      </div>
+      <div class="four-item">
+        <h3>3 · Evidence</h3>
+        <p>Specific <code>rev_XXXX</code> review IDs + GitHub <code>#NNNN</code> issue numbers.</p>
+      </div>
+      <div class="four-item">
+        <h3>4 · Verdict</h3>
+        <p>IGNORED · UNDER-PRIORITIZED · MISUNDERSTOOD — vs the roadmap.</p>
+      </div>
+    </div>
+    <div class="highlight">
+      Ranked by evidence strength. Strongest gap first. No evidence → no gap.
+    </div>
+  </div>
+</section>
 
+<!-- 4 HOW TO START -->
+<section class="slide" id="s4">
+  <div class="slide-inner">
+    <div class="slide-num">Slide 4 — How to start</div>
+    <h1>Run the app in four commands</h1>
+    <p class="lead">Batch pipeline → artifact → optional QA → read-only viewer.</p>
+
+    <ol class="steps">
+      <li>
+        <strong>Setup (once)</strong>
+        Copy <code>.env.example</code> → <code>.env</code>, add <code>ANTHROPIC_API_KEY</code> + <code>GITHUB_TOKEN</code>, then <code>pip install -r requirements.txt</code>
+      </li>
+      <li>
+        <strong>Build the report</strong>
+        <code>make run</code> — runs 5 pipeline stages → writes <code>gaps.json</code>
+      </li>
+      <li>
+        <strong>QA check (optional)</strong>
+        <code>make qa</code> — QA critic grades gaps pass/warn/fail. Does not change scores.
+      </li>
+      <li>
+        <strong>Open the UI</strong>
+        <code>make viewer</code> → http://localhost:8000/viewer/
+      </li>
+    </ol>
+
+    <div class="cmd">
+      make run<br>
+      make qa<br>
+      make viewer<br>
+      <span class="comment"># Viewer only reads JSON — no AI runs at demo time</span>
+    </div>
+
+    <div class="highlight">
+      Re-run is fast: each stage caches to <code>data/</code>. Use <code>make refresh</code> to rebuild everything.
+    </div>
+  </div>
+</section>
+
+<!-- 5 END TO END -->
+<section class="slide" id="s5">
+  <div class="slide-inner">
+    <div class="slide-num">Slide 5 — End-to-end flow</div>
+    <h1>From raw data to ranked gaps</h1>
+    <div class="mermaid-flow">
+      <p class="flow-title">Pipeline diagram</p>
+      <pre class="mermaid">
+%%{init: {'theme': 'base', 'themeVariables': {'lineColor': '#2563eb'}}}%%
+flowchart LR
+    HF["Reviews"] --> IN["Ingest"]
+    GH["GitHub"] --> IN
+    IN --> CL["Cluster"]
+    CL --> LA["Label"]
+    LA --> MA["Match"]
+    MA --> SC["Score"]
+    SC --> OUT["gaps.json"]
+    OUT --> VI["Viewer"]
+    OUT -.-> QA["QA critic"]
+    style LA fill:#fffbeb,stroke:#f59e0b
+    style QA fill:#f5f3ff,stroke:#7c3aed,stroke-dasharray:5 5
+    style OUT fill:#dcfce7,stroke:#16a34a
+      </pre>
+    </div>
+    <div class="pipe-row">
+      <div class="pipe-box input">Reviews</div><span class="pipe-arrow">+</span>
+      <div class="pipe-box input">Issues</div><span class="pipe-arrow">→</span>
+      <div class="pipe-box stage">Ingest</div><span class="pipe-arrow">→</span>
+      <div class="pipe-box stage">Cluster</div><span class="pipe-arrow">→</span>
+      <div class="pipe-box ai">Label</div><span class="pipe-arrow">→</span>
+      <div class="pipe-box stage">Match</div><span class="pipe-arrow">→</span>
+      <div class="pipe-box stage">Score</div><span class="pipe-arrow">→</span>
+      <div class="pipe-box out">gaps.json</div>
+    </div>
+  </div>
+</section>
+
+<!-- 6 FIVE STAGES -->
+<section class="slide" id="s6">
+  <div class="slide-inner">
+    <div class="slide-num">Slide 6 — Five stages</div>
+    <h1>What each stage does</h1>
+    <table class="results-table">
+      <thead><tr><th>Stage</th><th>Script</th><th>Does</th><th>AI?</th></tr></thead>
+      <tbody>
+        <tr><td>1 Ingest</td><td>ingest.py</td><td>Download reviews + issues, assign stable IDs</td><td>No</td></tr>
+        <tr><td>2 Cluster</td><td>cluster.py</td><td>Embed locally, UMAP, HDBSCAN → 23 clusters</td><td>No</td></tr>
+        <tr><td>3 Label</td><td>label.py</td><td>Name each cluster as a latent need</td><td>Label agent</td></tr>
+        <tr><td>4 Match</td><td>match.py</td><td>Compare need vs issues → verdict</td><td>Edge cases</td></tr>
+        <tr><td>5 Score</td><td>score.py</td><td>Formula + merge + rank → gaps.json</td><td>No</td></tr>
+        <tr><td>QA</td><td>qa_gaps.py</td><td>Lint output pass/warn/fail</td><td>QA critic</td></tr>
+      </tbody>
+    </table>
+    <div class="two-col">
       <div class="card">
-        <h2 style="margin-top:0">Three design principles</h2>
+        <h2 style="margin-top:0">Code decides</h2>
         <ul>
-          <li><strong>Latent, not literal</strong> — finds patterns users never stated directly, using clustering math across thousands of reviews</li>
-          <li><strong>Evidence-first</strong> — every gap links to specific <code>rev_XXXX</code> IDs and GitHub issue numbers; nothing is hand-waved</li>
-          <li><strong>Code decides, AI assists</strong> — grouping, scoring, and ranking come from algorithms and a published formula; three Claude agents (Label, Match, QA critic) handle language and validation only</li>
+          <li>Which reviews group together</li>
+          <li>Confidence &amp; ranking</li>
+          <li>Most verdict rules</li>
         </ul>
       </div>
-
       <div class="card">
-        <h2 style="margin-top:0">PPSSPP — headline finding</h2>
-        <p>The top gap: <strong>games run poorly (performance &amp; compatibility)</strong> — 81.3% confidence, 513 reviews, UNDER-PRIORITIZED. Three clusters merged. GitHub has related issues but none are actively prioritized in an open milestone.</p>
+        <h2 style="margin-top:0">Claude assists</h2>
+        <ul>
+          <li>Names clusters (Label agent)</li>
+          <li>Ambiguous verdicts (Match agent)</li>
+          <li>Validates output (QA critic)</li>
+        </ul>
       </div>
-
-      <div class="card">
-        <h2 style="margin-top:0">Why this matters</h2>
-        <p>Open-source maintainers and product teams get a structured, ranked view of what users actually need — compared directly against what the team has planned — without reading thousands of reviews manually or trusting an AI summary.</p>
-      </div>
-
-      <div class="highlight">
-        Silent Stakeholder turns thousands of individual review voices into a small set of evidence-backed gaps — and holds them up against the roadmap to show what is missing.
-      </div>
-
-      <p style="margin-top:1.5rem">
-        <a href="index.html" style="color:var(--accent);font-weight:600;font-size:.95rem">→ Open Results page — live demo with evidence and formula breakdown</a>
-      </p>
     </div>
-  </section>
+  </div>
+</section>
+
+<!-- 7 CLUSTER -->
+<section class="slide" id="s7">
+  <div class="slide-inner">
+    <div class="slide-num">Slide 7 — Clustering</div>
+    <h1>Finding patterns — not summarizing</h1>
+    <p>Different surface complaints → same cluster → same latent need.</p>
+    <ul>
+      <li><strong>Embed</strong> — sentence-transformers locally (384-dim vectors)</li>
+      <li><strong>Filter</strong> — drop reviews &lt; 50 chars ("Good", "Nice")</li>
+      <li><strong>UMAP</strong> — 384 → 10 dimensions</li>
+      <li><strong>HDBSCAN</strong> — auto cluster count, noise = excluded</li>
+      <li><strong>Result</strong> — 23 clusters, each with <code>review_ids</code> + tightness</li>
+    </ul>
+    <div class="card">
+      <p><strong>Example:</strong> "GTA lags" · "God of War crashes" · "too slow after update" → cluster c_09 (232 reviews) → merged into gap #1</p>
+    </div>
+    <div class="highlight">
+      Cluster membership is ground truth. The LLM never moves reviews between groups.
+    </div>
+  </div>
+</section>
+
+<!-- 8 AGENTS -->
+<section class="slide" id="s8">
+  <div class="slide-inner">
+    <div class="slide-num">Slide 8 — Three Claude agents</div>
+    <h1>Same API key · three contracts</h1>
+    <p>All use Anthropic <code>claude-sonnet-4-6</code>. All cached to disk.</p>
+    <div class="card">
+      <h2 style="margin-top:0">Label agent · label.py</h2>
+      <p>Reads ~20 sample reviews from a fixed cluster → writes need + theme. Does not change grouping or scores.</p>
+    </div>
+    <div class="card">
+      <h2 style="margin-top:0">Match agent · match.py</h2>
+      <p>Only when an active open issue matches with high similarity → MISUNDERSTOOD vs addressed. Rules handle the rest.</p>
+    </div>
+    <div class="card">
+      <h2 style="margin-top:0">QA critic · qa_gaps.py</h2>
+      <p>After pipeline: latent need or complaint summary? pass / warn / fail + pitch tips. Read-only — never mutates gaps.json.</p>
+    </div>
+    <div class="highlight">
+      Math finds patterns. Claude names and validates. Code scores and ranks.
+    </div>
+  </div>
+</section>
+
+<!-- 9 FORMULA -->
+<section class="slide" id="s9">
+  <div class="slide-inner">
+    <div class="slide-num">Slide 9 — Confidence formula</div>
+    <h1>Every % comes from code</h1>
+    <div class="formula-big">
+      confidence = (0.35 × volume) + (0.20 × tightness) + (0.45 × gap_clarity)
+    </div>
+    <ul>
+      <li><strong>Volume (35%)</strong> — log-scaled review count</li>
+      <li><strong>Tightness (20%)</strong> — how similar reviews in the cluster are</li>
+      <li><strong>Gap clarity (45%)</strong> — IGNORED=1.0 · UNDER-PRIORITIZED=0.8 · MISUNDERSTOOD=0.6</li>
+    </ul>
+    <div class="card">
+      <h2 style="margin-top:0">Gap #1 example → 81.3%</h2>
+      <p style="font-family:monospace;font-size:.8rem">(0.35 × 0.9991) + (0.20 × 0.5189) + (0.45 × 0.80) = 0.8135</p>
+      <p>513 reviews · UNDER-PRIORITIZED · recalculable from gaps.json</p>
+    </div>
+  </div>
+</section>
+
+<!-- 10 VERDICTS -->
+<section class="slide" id="s10">
+  <div class="slide-inner">
+    <div class="slide-num">Slide 10 — Verdicts</div>
+    <h1>Roadmap alignment</h1>
+    <div class="verdict-grid">
+      <div class="verdict-card v-ignored">
+        <h3>Ignored</h3>
+        <p>No similar issue (similarity &lt; 0.35). Team may not know this need exists.</p>
+      </div>
+      <div class="verdict-card v-under">
+        <h3>Under-prioritized</h3>
+        <p>Issues exist but closed, stale, or not on open milestones.</p>
+      </div>
+      <div class="verdict-card v-mis">
+        <h3>Misunderstood</h3>
+        <p>Team works on related problem — wrong angle. Or shipped fix, users still complain.</p>
+      </div>
+    </div>
+    <div class="card" style="margin-top:.85rem">
+      <h2 style="margin-top:0">Example · Black screen (#10, 63.9%)</h2>
+      <p>Issue #15469 shipped in v1.14.0 for Raspberry Pi. Android users still report black screens. MISUNDERSTOOD — fixed narrow case, not general failure.</p>
+    </div>
+  </div>
+</section>
+
+<!-- 11 RESULTS -->
+<section class="slide" id="s11">
+  <div class="slide-inner">
+    <div class="slide-num">Slide 11 — Results</div>
+    <h1>Top 5 unmet needs · PPSSPP</h1>
+    <table class="results-table">
+      <thead><tr><th>#</th><th>Theme</th><th>Conf</th><th>Reviews</th><th>Verdict</th></tr></thead>
+      <tbody>
+        <tr><td>1</td><td>Games run poorly</td><td>81.3%</td><td>513</td><td>UNDER-PRIORITIZED</td></tr>
+        <tr><td>2</td><td>Game acquisition guidance</td><td>80.5%</td><td>516</td><td>UNDER-PRIORITIZED</td></tr>
+        <tr><td>3</td><td>Game compatibility reliability</td><td>73.4%</td><td>170</td><td>MISUNDERSTOOD</td></tr>
+        <tr><td>4</td><td>Device compatibility</td><td>73.3%</td><td>70</td><td>UNDER-PRIORITIZED</td></tr>
+        <tr><td>5</td><td>Emulation speed</td><td>71.3%</td><td>54</td><td>UNDER-PRIORITIZED</td></tr>
+      </tbody>
+    </table>
+    <p style="margin-top:.75rem">Gap #2 QA grade: <strong>pass</strong> — clearest latent need (zero-to-playing onboarding). Gap #1 merged c_09+c_20+c_22.</p>
+    <div class="highlight">
+      18 total ranked gaps in gaps.json. Results page shows evidence, formula breakdown, and QA grades.
+    </div>
+  </div>
+</section>
+
+<!-- 12 LATENT EXAMPLE -->
+<section class="slide" id="s12">
+  <div class="slide-inner">
+    <div class="slide-num">Slide 12 — Latent need example</div>
+    <h1>Not a complaint summary</h1>
+    <div class="two-col">
+      <div class="card">
+        <h2 style="margin-top:0;color:#b91c1c">Summarizer (bad)</h2>
+        <p>"513 users complained about slow games."</p>
+      </div>
+      <div class="card">
+        <h2 style="margin-top:0;color:#15803d">Silent Stakeholder (good)</h2>
+        <p>"Users need consistent performance across all PSP titles regardless of game size, graphics type, or device specs."</p>
+      </div>
+    </div>
+    <h2>Surface complaints (what users literally said)</h2>
+    <ul>
+      <li>GTA lags on certain titles</li>
+      <li>2D games lag while 3D titles run fine</li>
+      <li>Specific games crash mid-mission</li>
+      <li>Android slower than PC/Linux</li>
+    </ul>
+    <p><strong>Hidden need:</strong> Predictable playability per game×device — users never wrote that sentence.</p>
+    <div class="highlight">
+      Proof: 513 review IDs in gaps.json + merge_reason in score.py + GitHub issues #15281, #14074.
+    </div>
+  </div>
+</section>
+
+<!-- 13 LIVE DEMO -->
+<section class="slide" id="s13">
+  <div class="slide-inner">
+    <div class="slide-num">Slide 13 — Live demo</div>
+    <h1>Demo script (~2 minutes)</h1>
+    <ol class="steps">
+      <li><strong>Before demo</strong>Run <code>make run</code>, <code>make qa</code>, <code>make viewer</code> — pipeline already done.</li>
+      <li><strong>Results page</strong>Show stats: 9,771 reviews, 5 headline gaps, pipeline strip.</li>
+      <li><strong>Gap #1</strong>Open card → latent need sentence → formula bars → 81.3% breakdown.</li>
+      <li><strong>Evidence</strong>Expand accordion → sample reviews + rev IDs + issue #15281 link.</li>
+      <li><strong>QA</strong>Show pass/warn banner — QA critic validated latent need framing.</li>
+      <li><strong>Defend rank</strong>#1 beats #2 on tightness (0.52 vs 0.48) — formula in score.py, not AI opinion.</li>
+    </ol>
+    <p style="margin-top:.75rem">
+      <a href="index.html" style="color:var(--accent);font-weight:600">→ Open Results page now</a>
+    </p>
+  </div>
+</section>
+
+<!-- 14 CLOSE -->
+<section class="slide" id="s14">
+  <div class="slide-inner">
+    <div class="slide-num">Slide 14 — Summary</div>
+    <h1>Silent Stakeholder</h1>
+    <ul>
+      <li><strong>Latent needs</strong> — clustering finds patterns users never stated in one sentence</li>
+      <li><strong>Evidence-first</strong> — every gap has review IDs + issue IDs</li>
+      <li><strong>Auditable scores</strong> — formula in code, not LLM opinion</li>
+      <li><strong>Roadmap verdicts</strong> — IGNORED / UNDER-PRIORITIZED / MISUNDERSTOOD</li>
+      <li><strong>Three Claude agents</strong> — Label, Match, QA critic (optional)</li>
+    </ul>
+    <div class="cmd">
+      make run &nbsp;→&nbsp; make qa &nbsp;→&nbsp; make viewer
+    </div>
+    <div class="highlight">
+      Ask me why any number is what it is — I'll point to the line in score.py and the IDs in gaps.json.
+    </div>
+    <p style="margin-top:1.25rem">
+      <a href="index.html" style="color:var(--accent);font-weight:600;font-size:.95rem">→ Live Results demo</a>
+    </p>
+  </div>
+</section>
 
 <script src="https://cdn.jsdelivr.net/npm/mermaid@10/dist/mermaid.min.js"></script>
-<script>
-mermaid.initialize({ startOnLoad: true, securityLevel: 'loose', flowchart: { curve: 'basis' } });
-</script>
+<script>mermaid.initialize({ startOnLoad: true, securityLevel: 'loose' });</script>
 <script>
 const slides = [...document.querySelectorAll('.slide')];
 const indicator = document.getElementById('indicator');
@@ -739,12 +578,10 @@ function goTo(idx) {
 
 document.getElementById('prev').onclick = () => goTo(currentSlideIndex() - 1);
 document.getElementById('next').onclick = () => goTo(currentSlideIndex() + 1);
-
 document.addEventListener('keydown', e => {
   if (e.key === 'ArrowRight' || e.key === 'ArrowDown') { e.preventDefault(); goTo(currentSlideIndex() + 1); }
   if (e.key === 'ArrowLeft' || e.key === 'ArrowUp') { e.preventDefault(); goTo(currentSlideIndex() - 1); }
 });
-
 window.addEventListener('scroll', updateUI, { passive: true });
 updateUI();
 </script>
